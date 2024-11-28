@@ -67,24 +67,39 @@ def create_network(hidden_layers, batch_size, learning_rate):
         cost_series.append(cost)
         accuracy_series.append(accuracy)
 
-    plt.figure(figsize=(10, 5))
-    plt.get_current_fig_manager().set_window_title(f"Hidden layer : {hidden_layers}, batch size : {batch_size}, learning rate : {learning_rate}")
+    def on_legend_click(event):
+        legend_line = event.artist
+        original_line = legend_line.original_line
+        
+        visible = not original_line.get_visible()
+        original_line.set_visible(visible)
+        
+        legend_line.set_alpha(1.0 if visible else 0.2)
+        plt.gcf().canvas.draw()
 
-    plt.subplot(1, 2, 1)
-    plt.plot(cost_series, label='Cost', color='blue', marker='o', markersize=2, linewidth=1)
-    plt.title('Cost per Batch')
-    plt.xlabel(f'Batch Number')
-    plt.ylabel('Cost')
-    plt.grid(True)
-    plt.legend()
+    plt.figure(figsize=(5, 5))
+    plt.get_current_fig_manager().set_window_title("Trained Neural Network")
 
-    plt.subplot(1, 2, 2)
-    plt.plot(accuracy_series, label='Accuracy', color='green', marker='o', markersize=2, linewidth=1)
-    plt.title('Accuracy per Batch')
-    plt.xlabel(f'Batch Number ({batch_size} samples each)')
-    plt.ylabel('Accuracy')
+    cost_line, = plt.plot(cost_series, label='Cost per output neuron', color='blue', marker='o', markersize=2, linewidth=1)
+    accuracy_line, = plt.plot(accuracy_series, label='Accuracy', color='green', marker='o', markersize=2, linewidth=1)
+
+    plt.title('Cost and Accuracy vs. Batch Number')
+    plt.xlabel('Batch Number')
+    plt.ylabel('Cost and Accuracy')
     plt.grid(True)
-    plt.legend()
+
+    plt.text(
+        0.5, 0.02,
+        f'Hidden layers: {hidden_layers}, Batch size: {batch_size}, Learning rate: {learning_rate}',
+        fontsize=10, color='black', ha='center', transform=plt.gcf().transFigure
+    )
+
+    legend = plt.legend()
+    for legend_line, original_line in zip(legend.get_lines(), [cost_line, accuracy_line]):
+        legend_line.original_line = original_line
+        legend_line.set_picker(True)
+
+    plt.gcf().canvas.mpl_connect('pick_event', on_legend_click)
 
     plt.tight_layout()
     plt.show()
@@ -100,7 +115,7 @@ def run_training():
         messagebox.showerror("Input Error", "Please enter valid numbers.")
 
 root = tk.Tk()
-root.title("Neural Network Trainer")
+root.title("Parameters Entry")
 
 tk.Label(root, text="Hidden Layers (comma-separated):").grid(row=0, column=0)
 hidden_layers_entry = tk.Entry(root)
