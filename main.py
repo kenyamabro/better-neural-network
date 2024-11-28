@@ -12,7 +12,7 @@ y_train_one_hot = np.eye(10)[y_train]
 
 NNid = 0
 
-def create_network(hidden_layers, batch_size, learning_rate):
+def create_network(hidden_layers, batch_size, learning_rate, noise):
     layers = [784] + hidden_layers + [10]
 
     global w, b, NNid
@@ -32,7 +32,7 @@ def create_network(hidden_layers, batch_size, learning_rate):
 
         for image_idx in range(first_sample, first_sample + batch_size):
             y = y_train_one_hot[image_idx]
-            a = [x_train[image_idx]]
+            a = [x_train[image_idx] + np.random.uniform(-noise, noise, 784)]
 
             z = []
             for l in range(1, len(layers)):
@@ -69,10 +69,12 @@ def create_network(hidden_layers, batch_size, learning_rate):
         accuracy_series.append(accuracy)
 
     NNid += 1
+    parameters_info = f'Hidden layers: {hidden_layers}, Batch size: {batch_size}, Learning rate: {learning_rate}, Noise: {noise}'
 
     plt.figure(figsize=(5, 5))
-    plt.get_current_fig_manager().set_window_title(f"[{NNid}] Cost and Accuracy vs. Batch Number")
-    plt.suptitle(f'Cost and Accuracy vs. Batch Number\nHidden layers: {hidden_layers}, Batch size: {batch_size}, Learning rate: {learning_rate}',fontsize=10)
+    plt_title = 'Cost and Accuracy vs. Batch Number'
+    plt.get_current_fig_manager().set_window_title(f"[{NNid}] {plt_title}")
+    plt.suptitle(f'{plt_title}\n{parameters_info}', fontsize=10)
 
     cost_line, = plt.plot(cost_series, label='Cost per output neuron', color='blue', marker='o', markersize=2, linewidth=1)
     accuracy_line, = plt.plot(accuracy_series, label='Accuracy', color='green', marker='o', markersize=2, linewidth=1)
@@ -108,8 +110,9 @@ def create_network(hidden_layers, batch_size, learning_rate):
         rows += 1
 
     plt.figure(figsize=((5 / rows) * columns, 5))
-    plt.get_current_fig_manager().set_window_title(f"[{NNid}] Heatmaps of Weights between Each Second-Layer and All Input Neurons")
-    plt.suptitle(f'Heatmaps of Weights between Each Second-Layer and All Input Neurons\nHidden layers: {hidden_layers}, Batch size: {batch_size}, Learning rate: {learning_rate}', fontsize=10)
+    plt_title = 'Heatmaps of Weights between Each Second-Layer and All Input Neurons'
+    plt.get_current_fig_manager().set_window_title(f"[{NNid}] {plt_title}")
+    plt.suptitle(f'{plt_title}\n{parameters_info}', fontsize=10)
 
     max_weight = np.max(np.abs(w[0]))
 
@@ -127,8 +130,9 @@ def run_training():
         hidden_layers = list(map(int, entries[0].get().split(',')))
         batch_size = int(entries[1].get())
         learning_rate = float(entries[2].get())
+        noise = float(entries[3].get())
 
-        create_network(hidden_layers, batch_size, learning_rate)
+        create_network(hidden_layers, batch_size, learning_rate, noise)
     except ValueError as e:
         print(f"ValueError: {e}")
         messagebox.showerror("Input Error", f"Please enter valid numbers. Error: {e}")
@@ -150,7 +154,7 @@ def create_entry(text, row, default_entry):
 create_entry("Hidden Layers (comma-separated):", 0, "20,20")
 create_entry("Batch Size:", 1, "50")
 create_entry("Learning Rate:", 2, "0.4")
-# create_entry("Noise:", 3, "0")
+create_entry("Noise:", 3, "0")
 
 train_button = tk.Button(root, text="Train", command=run_training)
 train_button.grid(row=4, column=0, columnspan=2)
