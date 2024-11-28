@@ -67,7 +67,7 @@ def create_network(hidden_layers, batch_size, learning_rate):
         accuracy_series.append(accuracy)
 
     plt.figure(figsize=(5, 5))
-    plt.get_current_fig_manager().set_window_title("Trained Neural Network")
+    plt.get_current_fig_manager().set_window_title("Cost and Accuracy vs. Batch Number")
 
     cost_line, = plt.plot(cost_series, label='Cost per output neuron', color='blue', marker='o', markersize=2, linewidth=1)
     accuracy_line, = plt.plot(accuracy_series, label='Accuracy', color='green', marker='o', markersize=2, linewidth=1)
@@ -103,18 +103,21 @@ def create_network(hidden_layers, batch_size, learning_rate):
     plt.tight_layout()
     plt.show(block=False)
 
-    plt.figure(figsize=(10, 5))
-
     map_num = layers[1]
     rows = np.floor(np.sqrt(map_num)-0.0001).astype("int")
     columns = rows + 1
     if rows * (columns) < map_num:
         rows += 1
 
+    plt.figure(figsize=((5 / rows) * columns, 5))
+    plt.get_current_fig_manager().set_window_title("Heatmaps of the Weights between each Second-Layer Neuron and All Input Neurons")
+
+    max_weight = np.max(np.abs(w[0]))
+
     for i in range(map_num):
         plt.subplot(rows, columns, i + 1)
-        plt.imshow(w[0][i].reshape(28, 28), cmap='bwr', aspect='auto')
-        plt.colorbar()
+        plt.imshow(w[0][i].reshape(28, 28), cmap='bwr', aspect='auto', vmin=-max_weight, vmax=max_weight)
+        if i + 1 == map_num: plt.colorbar()
         plt.axis('off')
 
     plt.suptitle('Heatmaps of the Weights between each Second-Layer Neuron and All Input Neurons')
@@ -123,9 +126,9 @@ def create_network(hidden_layers, batch_size, learning_rate):
 
 def run_training():
     try:
-        hidden_layers = list(map(int, hidden_layers_entry.get().split(',')))
-        batch_size = int(batch_size_entry.get())
-        learning_rate = float(learning_rate_entry.get())
+        hidden_layers = list(map(int, entries[0].get().split(',')))
+        batch_size = int(entries[1].get())
+        learning_rate = float(entries[2].get())
 
         create_network(hidden_layers, batch_size, learning_rate)
     except ValueError as e:
@@ -137,23 +140,21 @@ def run_training():
 
 root = tk.Tk()
 root.title("Parameters Entry")
+entries = []
 
-tk.Label(root, text="Hidden Layers (comma-separated):").grid(row=0, column=0)
-hidden_layers_entry = tk.Entry(root)
-hidden_layers_entry.grid(row=0, column=1)
-hidden_layers_entry.insert(0, "20,20")
+def create_entry(text, row, default_entry):
+    tk.Label(root, text=text).grid(row=row, column=0)
+    entry = tk.Entry(root)
+    entry.grid(row=row, column=1)
+    entry.insert(0, default_entry)
+    entries.append(entry)
 
-tk.Label(root, text="Batch Size:").grid(row=1, column=0)
-batch_size_entry = tk.Entry(root)
-batch_size_entry.grid(row=1, column=1)
-batch_size_entry.insert(0, "50")
-
-tk.Label(root, text="Learning Rate:").grid(row=2, column=0)
-learning_rate_entry = tk.Entry(root)
-learning_rate_entry.grid(row=2, column=1)
-learning_rate_entry.insert(0, "0.4")
+create_entry("Hidden Layers (comma-separated):", 0, "20,20")
+create_entry("Batch Size:", 1, "50")
+create_entry("Learning Rate:", 2, "0.4")
+create_entry("Noise:", 3, "0")
 
 train_button = tk.Button(root, text="Train", command=run_training)
-train_button.grid(row=3, column=0, columnspan=2)
+train_button.grid(row=4, column=0, columnspan=2)
 
 root.mainloop()
