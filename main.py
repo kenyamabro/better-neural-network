@@ -145,7 +145,7 @@ root.title("Parameters Entry")
 entries = []
 
 def create_entry(text, row, default_entry):
-    tk.Label(root, text=text).grid(row=row, column=0)
+    tk.Label(root, text=text, anchor='w').grid(row=row, column=0, sticky='w')
     entry = tk.Entry(root)
     entry.grid(row=row, column=1)
     entry.insert(0, default_entry)
