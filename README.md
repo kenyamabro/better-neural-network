@@ -4,3 +4,5 @@ The network is trained on the MNIST dataset.
 After training, the following is displayed (the plots are pyplots from matplotlib):
   - Plot of accuracy and average cost per output neuron vs. batch number
   - Heatmaps of the weights between each second-layer neuron and all input neurons
+
+![This is a demo of the application](https://github.com/kenyamabro/better-neural-network/blob/main/demo.png)
