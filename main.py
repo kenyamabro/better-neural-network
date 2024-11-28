@@ -10,10 +10,12 @@ mnist = tf.keras.datasets.mnist
 x_train = x_train.reshape(-1, 784).astype("float32") / 255.0
 y_train_one_hot = np.eye(10)[y_train]
 
+NNid = 0
+
 def create_network(hidden_layers, batch_size, learning_rate):
     layers = [784] + hidden_layers + [10]
 
-    global w, b
+    global w, b, NNid
     w = [np.random.uniform(-1, 1, (layers[i + 1], layers[i]))
          for i in range(len(layers) - 1)]
     b = [np.random.uniform(-0.5, 0.5, layers[i + 1])
@@ -66,8 +68,10 @@ def create_network(hidden_layers, batch_size, learning_rate):
         cost_series.append(cost)
         accuracy_series.append(accuracy)
 
+    NNid += 1
+
     plt.figure(figsize=(5, 5))
-    plt.get_current_fig_manager().set_window_title("Cost and Accuracy vs. Batch Number")
+    plt.get_current_fig_manager().set_window_title(f"[{NNid}] Cost and Accuracy vs. Batch Number")
 
     cost_line, = plt.plot(cost_series, label='Cost per output neuron', color='blue', marker='o', markersize=2, linewidth=1)
     accuracy_line, = plt.plot(accuracy_series, label='Accuracy', color='green', marker='o', markersize=2, linewidth=1)
@@ -110,7 +114,7 @@ def create_network(hidden_layers, batch_size, learning_rate):
         rows += 1
 
     plt.figure(figsize=((5 / rows) * columns, 5))
-    plt.get_current_fig_manager().set_window_title("Heatmaps of the Weights between each Second-Layer Neuron and All Input Neurons")
+    plt.get_current_fig_manager().set_window_title(f"[{NNid}] Heatmaps of Weights between Each Second-Layer and All Input Neurons")
 
     max_weight = np.max(np.abs(w[0]))
 
@@ -120,7 +124,7 @@ def create_network(hidden_layers, batch_size, learning_rate):
         if i + 1 == map_num: plt.colorbar()
         plt.axis('off')
 
-    plt.suptitle('Heatmaps of the Weights between each Second-Layer Neuron and All Input Neurons')
+    plt.suptitle('Heatmaps of Weights between Each Second-Layer and All Input Neurons')
     plt.tight_layout()
     plt.show()
 
