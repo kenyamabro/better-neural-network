@@ -76,7 +76,7 @@ def create_network(hidden_layers, batch_size, learning_rate, noise):
     plt.get_current_fig_manager().set_window_title(f'[{NNid}] {plt_title}')
     plt.suptitle(f'{plt_title}\n{parameters_info}', fontsize=10)
 
-    cost_line, = plt.plot(cost_series, label='Cost per output neuron', color='blue', marker='o', markersize=2, linewidth=1)
+    cost_line, = plt.plot(cost_series, label='Cost per output neuron', color='orange', marker='o', markersize=2, linewidth=1)
     accuracy_line, = plt.plot(accuracy_series, label='Accuracy', color='green', marker='o', markersize=2, linewidth=1)
 
     plt.xlabel('Batch Number')
