@@ -25,7 +25,6 @@ def create_network(hidden_layers, batch_size, learning_rate):
     def minimize_cost_function(first_sample):
         costs_sum = 0
         accuracy = 0
-
         w_gradient = [np.zeros_like(layer) for layer in w]
         b_gradient = [np.zeros_like(layer) for layer in b]
 
@@ -56,9 +55,9 @@ def create_network(hidden_layers, batch_size, learning_rate):
             w[l] -= learning_rate * w_gradient[l] / batch_size
             b[l] -= learning_rate * b_gradient[l] / batch_size
 
-        cost_per_neuron_average = costs_sum / layers[-1] / batch_size
+        cost = costs_sum / layers[-1] / batch_size
         accuracy /= batch_size
-        return cost_per_neuron_average, accuracy
+        return cost, accuracy
 
     cost_series = []
     accuracy_series = []
@@ -66,16 +65,6 @@ def create_network(hidden_layers, batch_size, learning_rate):
         cost, accuracy = minimize_cost_function(batch_size * x)
         cost_series.append(cost)
         accuracy_series.append(accuracy)
-
-    def on_legend_click(event):
-        legend_line = event.artist
-        original_line = legend_line.original_line
-        
-        visible = not original_line.get_visible()
-        original_line.set_visible(visible)
-        
-        legend_line.set_alpha(1.0 if visible else 0.2)
-        plt.gcf().canvas.draw()
 
     plt.figure(figsize=(5, 5))
     plt.get_current_fig_manager().set_window_title("Trained Neural Network")
@@ -99,8 +88,36 @@ def create_network(hidden_layers, batch_size, learning_rate):
         legend_line.original_line = original_line
         legend_line.set_picker(True)
 
+    def on_legend_click(event):
+        legend_line = event.artist
+        original_line = legend_line.original_line
+        
+        visible = not original_line.get_visible()
+        original_line.set_visible(visible)
+        
+        legend_line.set_alpha(1.0 if visible else 0.2)
+        plt.gcf().canvas.draw()
+
     plt.gcf().canvas.mpl_connect('pick_event', on_legend_click)
 
+    plt.tight_layout()
+    plt.show(block=False)
+
+    plt.figure(figsize=(10, 5))
+
+    map_num = layers[1]
+    rows = np.floor(np.sqrt(map_num)-0.0001).astype("int")
+    columns = rows + 1
+    if rows * (columns) < map_num:
+        rows += 1
+
+    for i in range(map_num):
+        plt.subplot(rows, columns, i + 1)
+        plt.imshow(w[0][i].reshape(28, 28), cmap='bwr', aspect='auto')
+        plt.colorbar()
+        plt.axis('off')
+
+    plt.suptitle('Heatmaps of the Weights between each Second-Layer Neuron and All Input Neurons')
     plt.tight_layout()
     plt.show()
 
@@ -111,8 +128,12 @@ def run_training():
         learning_rate = float(learning_rate_entry.get())
 
         create_network(hidden_layers, batch_size, learning_rate)
-    except ValueError:
-        messagebox.showerror("Input Error", "Please enter valid numbers.")
+    except ValueError as e:
+        print(f"ValueError: {e}")
+        messagebox.showerror("Input Error", f"Please enter valid numbers. Error: {e}")
+    except Exception as e:
+        print(f"Exception: {e}")        
+        messagebox.showerror("Unexpected Error", f"An unexpected error occurred. Error: {e}")
 
 root = tk.Tk()
 root.title("Parameters Entry")
