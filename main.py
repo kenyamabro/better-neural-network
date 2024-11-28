@@ -72,20 +72,14 @@ def create_network(hidden_layers, batch_size, learning_rate):
 
     plt.figure(figsize=(5, 5))
     plt.get_current_fig_manager().set_window_title(f"[{NNid}] Cost and Accuracy vs. Batch Number")
+    plt.suptitle(f'Cost and Accuracy vs. Batch Number\nHidden layers: {hidden_layers}, Batch size: {batch_size}, Learning rate: {learning_rate}',fontsize=10)
 
     cost_line, = plt.plot(cost_series, label='Cost per output neuron', color='blue', marker='o', markersize=2, linewidth=1)
     accuracy_line, = plt.plot(accuracy_series, label='Accuracy', color='green', marker='o', markersize=2, linewidth=1)
 
-    plt.title('Cost and Accuracy vs. Batch Number')
     plt.xlabel('Batch Number')
     plt.ylabel('Cost and Accuracy')
     plt.grid(True)
-
-    plt.text(
-        0.5, 0.02,
-        f'Hidden layers: {hidden_layers}, Batch size: {batch_size}, Learning rate: {learning_rate}',
-        fontsize=10, color='black', ha='center', transform=plt.gcf().transFigure
-    )
 
     legend = plt.legend()
     for legend_line, original_line in zip(legend.get_lines(), [cost_line, accuracy_line]):
@@ -115,6 +109,7 @@ def create_network(hidden_layers, batch_size, learning_rate):
 
     plt.figure(figsize=((5 / rows) * columns, 5))
     plt.get_current_fig_manager().set_window_title(f"[{NNid}] Heatmaps of Weights between Each Second-Layer and All Input Neurons")
+    plt.suptitle(f'Heatmaps of Weights between Each Second-Layer and All Input Neurons\nHidden layers: {hidden_layers}, Batch size: {batch_size}, Learning rate: {learning_rate}', fontsize=10)
 
     max_weight = np.max(np.abs(w[0]))
 
@@ -124,7 +119,6 @@ def create_network(hidden_layers, batch_size, learning_rate):
         if i + 1 == map_num: plt.colorbar()
         plt.axis('off')
 
-    plt.suptitle('Heatmaps of Weights between Each Second-Layer and All Input Neurons')
     plt.tight_layout()
     plt.show()
 
