@@ -133,7 +133,7 @@ def run_training():
         print(f"ValueError: {e}")
         messagebox.showerror("Input Error", f"Please enter valid numbers. Error: {e}")
     except Exception as e:
-        print(f"Exception: {e}")        
+        print(f"Exception: {e}")
         messagebox.showerror("Unexpected Error", f"An unexpected error occurred. Error: {e}")
 
 root = tk.Tk()
@@ -150,7 +150,7 @@ def create_entry(text, row, default_entry):
 create_entry("Hidden Layers (comma-separated):", 0, "20,20")
 create_entry("Batch Size:", 1, "50")
 create_entry("Learning Rate:", 2, "0.4")
-create_entry("Noise:", 3, "0")
+# create_entry("Noise:", 3, "0")
 
 train_button = tk.Button(root, text="Train", command=run_training)
 train_button.grid(row=4, column=0, columnspan=2)
