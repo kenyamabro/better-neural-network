@@ -78,7 +78,9 @@ def create_network(hidden_layers, batch_size, learning_rate):
         plt.gcf().canvas.draw()
 
     plt.figure(figsize=(5, 5))
-    plt.get_current_fig_manager().set_window_title("Trained Neural Network")
+    plt.get_current_fig_manager().set_window_title(
+        f"Hidden layer: {hidden_layers}, batch size: {batch_size}, learning rate: {learning_rate}"
+    )
 
     cost_line, = plt.plot(cost_series, label='Cost per output neuron', color='blue', marker='o', markersize=2, linewidth=1)
     accuracy_line, = plt.plot(accuracy_series, label='Accuracy', color='green', marker='o', markersize=2, linewidth=1)
@@ -87,12 +89,7 @@ def create_network(hidden_layers, batch_size, learning_rate):
     plt.xlabel('Batch Number')
     plt.ylabel('Cost and Accuracy')
     plt.grid(True)
-
-    plt.text(
-        0.5, 0.02,
-        f'Hidden layers: {hidden_layers}, Batch size: {batch_size}, Learning rate: {learning_rate}',
-        fontsize=10, color='black', ha='center', transform=plt.gcf().transFigure
-    )
+    plt.legend()
 
     legend = plt.legend()
     for legend_line, original_line in zip(legend.get_lines(), [cost_line, accuracy_line]):
@@ -115,7 +112,7 @@ def run_training():
         messagebox.showerror("Input Error", "Please enter valid numbers.")
 
 root = tk.Tk()
-root.title("Parameters Entry")
+root.title("Neural Network Trainer")
 
 tk.Label(root, text="Hidden Layers (comma-separated):").grid(row=0, column=0)
 hidden_layers_entry = tk.Entry(root)
