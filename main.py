@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 mnist = tf.keras.datasets.mnist
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
-x_train = x_train.reshape(-1, 784).astype("float32") / 255.0
+x_train = x_train.reshape(-1, 784).astype('float32') / 255.0
 y_train_one_hot = np.eye(10)[y_train]
 
 NNid = 0
@@ -73,7 +73,7 @@ def create_network(hidden_layers, batch_size, learning_rate, noise):
 
     plt.figure(figsize=(5, 5))
     plt_title = 'Cost and Accuracy vs. Batch Number'
-    plt.get_current_fig_manager().set_window_title(f"[{NNid}] {plt_title}")
+    plt.get_current_fig_manager().set_window_title(f'[{NNid}] {plt_title}')
     plt.suptitle(f'{plt_title}\n{parameters_info}', fontsize=10)
 
     cost_line, = plt.plot(cost_series, label='Cost per output neuron', color='blue', marker='o', markersize=2, linewidth=1)
@@ -104,14 +104,14 @@ def create_network(hidden_layers, batch_size, learning_rate, noise):
     plt.show(block=False)
 
     map_num = layers[1]
-    rows = np.floor(np.sqrt(map_num)-0.0001).astype("int")
+    rows = np.floor(np.sqrt(map_num)-0.0001).astype('int')
     columns = rows + 1
     if rows * (columns) < map_num:
         rows += 1
 
     plt.figure(figsize=((5 / rows) * columns, 5))
     plt_title = 'Heatmaps of Weights between Each Second-Layer and All Input Neurons'
-    plt.get_current_fig_manager().set_window_title(f"[{NNid}] {plt_title}")
+    plt.get_current_fig_manager().set_window_title(f'[{NNid}] {plt_title}')
     plt.suptitle(f'{plt_title}\n{parameters_info}', fontsize=10)
 
     max_weight = np.max(np.abs(w[0]))
@@ -134,14 +134,14 @@ def run_training():
 
         create_network(hidden_layers, batch_size, learning_rate, noise)
     except ValueError as e:
-        print(f"ValueError: {e}")
-        messagebox.showerror("Input Error", f"Please enter valid numbers. Error: {e}")
+        print(f'ValueError: {e}')
+        messagebox.showerror('Input Error', f'Please enter valid numbers. Error: {e}')
     except Exception as e:
-        print(f"Exception: {e}")
-        messagebox.showerror("Unexpected Error", f"An unexpected error occurred. Error: {e}")
+        print(f'Exception: {e}')
+        messagebox.showerror('Unexpected Error', f'An unexpected error occurred. Error: {e}')
 
 root = tk.Tk()
-root.title("Parameters Entry")
+root.title('Parameters Entry')
 entries = []
 
 def create_entry(text, row, default_entry):
@@ -151,12 +151,12 @@ def create_entry(text, row, default_entry):
     entry.insert(0, default_entry)
     entries.append(entry)
 
-create_entry("Hidden Layers (comma-separated):", 0, "20,20")
-create_entry("Batch Size:", 1, "50")
-create_entry("Learning Rate:", 2, "0.4")
-create_entry("Noise:", 3, "0")
+create_entry('Hidden Layers (comma-separated):', 0, '20,20')
+create_entry('Batch Size:', 1, '50')
+create_entry('Learning Rate:', 2, '0.4')
+create_entry('Noise:', 3, '0')
 
-train_button = tk.Button(root, text="Train", command=run_training)
+train_button = tk.Button(root, text='Train', command=run_training)
 train_button.grid(row=4, column=0, columnspan=2)
 
 root.mainloop()
