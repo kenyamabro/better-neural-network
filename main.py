@@ -3,6 +3,10 @@ from tkinter import messagebox
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
+from PIL import ImageGrab
+from screeninfo import get_monitors
+
+monitors = get_monitors()
 
 mnist = tf.keras.datasets.mnist
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
@@ -174,24 +178,131 @@ def on_item_select(event):
         plt.gcf().canvas.mpl_connect('pick_event', on_legend_click)
 
         plt.tight_layout()
-        plt.show()
+        plt.show(block=False)
+
+        def draw(event):
+            x, y = event.x, event.y
+            try: fs = int(font_size_entry.get())
+            except: return
+            color = color_var.get()
+            canvas.create_oval(x-fs, y-fs, x+fs, y+fs, fill=color, outline=color)
+
+        def clear_canvas():
+            canvas.delete('all')
+
+        def read_canvas():
+            guesses_placeholder_label.lower()
+
+            canvas_x = canvas.winfo_rootx()
+            canvas_y = canvas.winfo_rooty()
+            canvas_width = canvas.winfo_width()
+            canvas_height = canvas.winfo_height()
+
+            r = canvas_width / grid_canvas.winfo_width()
+
+            canvas_bbox = (canvas_x, canvas_y, canvas_x + canvas_width, canvas_y + canvas_height)
+
+            image = ImageGrab.grab(bbox=canvas_bbox)
+            pixels = np.array(image)
+
+            grid_canvas.delete("all")
+
+            grid_size_x = canvas_width // 28
+            grid_size_y = canvas_height // 28
+
+            pixelized_image = []
+
+            for row in range(28):
+                for col in range(28):
+                    x_start = col * grid_size_x
+                    x_end = (col + 1) * grid_size_x
+                    y_start = row * grid_size_y
+                    y_end = (row + 1) * grid_size_y
+
+                    cell_pixels = pixels[y_start:y_end, x_start:x_end]
+
+                    avg_color = np.mean(cell_pixels, axis=(0, 1))
+
+                    avg_color = tuple(int(c) for c in avg_color)
+                    color_hex = f'#{avg_color[0]:02x}{avg_color[1]:02x}{avg_color[2]:02x}'
+                    pixelized_image.append(avg_color[0])
+
+                    grid_canvas.create_rectangle(
+                        x_start // r, y_start // r, x_end // r, y_end // r,
+                        fill=color_hex, outline=color_hex
+                    )
+
+            pixelized_image = np.array(pixelized_image) / 255.0
+
+        drawing_window = tk.Toplevel()
+        drawing_window.title(f'[{NNid}] Drawing test')
+
+        canvas_layout = tk.Frame(drawing_window, width=400)
+        canvas_layout.grid(row=0, column=0, sticky='n')
+
+        tk.Label(canvas_layout, text='Test the neural network by drawing single digits:', anchor='w').grid(row=0, column=0, sticky='ew')
+        canvas = tk.Canvas(canvas_layout, width=400, height=400, bg='white')
+        canvas.grid(row=1, column=0)
+        canvas.bind("<B1-Motion>", draw)
+
+        control_layout = tk.Frame(drawing_window, width=200)
+        control_layout.grid(row=0, column=1, sticky='n')
+
+        tk.Label(control_layout, text='font size:', anchor='w').grid(row=0, column=0, sticky='w')
+        font_size_entry = tk.Entry(control_layout)
+        font_size_entry.grid(row=0, column=1, sticky='ew')
+        font_size_entry.insert(0, '10')
+
+        tk.Label(control_layout, text='color:', anchor='w').grid(row=1, column=0, sticky='w')
+        color_var = tk.StringVar(value='black')
+        color_menu = tk.OptionMenu(control_layout, color_var, 'black', 'white')
+        color_menu.grid(row=1, column=1, sticky='ew')
+
+        clear_button = tk.Button(control_layout, text='Clear', command=clear_canvas)
+        clear_button.grid(row=2, column=0, sticky='ew')
+
+        read_button = tk.Button(control_layout, text='Read', command=read_canvas)
+        read_button.grid(row=2, column=1, sticky='ew')
+
+        tk.Label(control_layout, text='read image:', anchor='w').grid(row=3, column=0, sticky='nw')
+        grid_canvas = tk.Canvas(control_layout, width=200, height=200, bg='white')
+        grid_canvas.grid(row=3, column=1)
+
+        tk.Label(control_layout, text='guesses:', anchor='w').grid(row=4, column=0, sticky='nw')
+        guesses_listbox = tk.Listbox(control_layout, height=4)
+        guesses_listbox.grid(row=4, column=1, sticky='ew')
+        guesses_placeholder_label = tk.Label(control_layout, text="Read your drawing first", fg="gray", bg="white")
+        control_layout.after(100,
+            lambda: guesses_placeholder_label.place(
+                x=guesses_listbox.winfo_x(),
+                y=guesses_listbox.winfo_y(),
+                width=guesses_listbox.winfo_width(),
+                height=guesses_listbox.winfo_height()
+            )
+        )
 
 root = tk.Tk()
-root.title('Parameters Entry')
+root.title('Neural Network Trainer')
 entries = []
 
-create_entry('Hidden Layers (comma-separated):', 0, '20,20')
-create_entry('Batch Size:', 1, '50')
-create_entry('Learning Rate:', 2, '0.4')
-create_entry('Noise:', 3, '0')
+tk.Label(root, text='Dataset used:', anchor='w').grid(row=0, column=0, sticky='nw')
+tk.Label(root, text='MNIST dataset\n (28x28 pixels images of\n handwritten single digits)', anchor='w').grid(row=0, column=1, sticky='w')
+
+tk.Label(root, text='Datapoints:', anchor='w').grid(row=1, column=0, sticky='w')
+tk.Label(root, text=len(x_train), anchor='w').grid(row=1, column=1, sticky='w')
+
+create_entry('Hidden Layers (comma-separated):', 2, '20,20')
+create_entry('Batch Size:', 3, '50')
+create_entry('Learning Rate:', 4, '0.4')
+create_entry('Noise:', 5, '0')
 
 train_button = tk.Button(root, text='Train', command=run_training)
-train_button.grid(row=4, column=0, sticky='ew')
+train_button.grid(row=6, column=0, sticky='ew')
 train_text_var = tk.StringVar(value='')
-tk.Label(root, textvariable=train_text_var, anchor='w').grid(row=4, column=1, sticky='w')
+tk.Label(root, textvariable=train_text_var, anchor='w').grid(row=6, column=1, sticky='w')
 
 listbox = tk.Listbox(root)
-listbox.grid(row=5, column=0, columnspan=2, sticky='ew')
+listbox.grid(row=7, column=0, columnspan=2, sticky='ew')
 listbox.bind("<Double-Button-1>", on_item_select)
 
 placeholder_label = tk.Label(root, text="The trained neural networks will appear here.\nDouble click to open them.", fg="gray", bg="white")
