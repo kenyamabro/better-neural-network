@@ -252,7 +252,7 @@ def on_item_select(event):
         canvas_layout = tk.Frame(drawing_window, width=400)
         canvas_layout.grid(row=0, column=0, sticky='n')
 
-        tk.Label(canvas_layout, text='Test the neural network by drawing single digits:', anchor='w').grid(row=0, column=0, sticky='ew')
+        tk.Label(canvas_layout, text=f'{parameters_info}\nTest the neural network by drawing single digits:', anchor='w').grid(row=0, column=0, sticky='ew')
         canvas = tk.Canvas(canvas_layout, width=400, height=400, bg='white')
         canvas.grid(row=1, column=0)
         canvas.bind("<B1-Motion>", draw)
