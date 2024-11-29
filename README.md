@@ -6,6 +6,7 @@ Clicking on a neural network in the list will display the following:
   - Drawing interface where the neural network guesses the digit that is drawn.
   - Plot of accuracy and average cost per output neuron vs. batch number
   - Heatmaps of the weights between each second-layer neuron and all input neurons
+
 Interface libraries used:
   - Tkinter in general
   - Matplotlib for the plots
