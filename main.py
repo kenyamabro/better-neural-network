@@ -116,11 +116,33 @@ def create_entry(text, row, default_entry):
 def on_item_select(event):
     widget = event.widget
     NNid = widget.nearest(event.y)
-    
+
     if NNid >= 0:
         NN = NN_list[NNid]
         NNid += 1
         parameters_info = f'Hidden layers: {NN['hidden_layers']}, Batch size: {NN['batch_size']}, Learning rate: {NN['learning_rate']}, Noise: {NN['noise']}'
+
+        map_num = NN['hidden_layers'][0]
+        rows = np.floor(np.sqrt(map_num)-0.0001).astype('int')
+        columns = rows + 1
+        if rows * (columns) < map_num:
+            rows += 1
+
+        plt.figure(figsize=((5 / rows) * columns, 5))
+        plt_title = 'Heatmaps of Weights between Each Second-Layer and All Input Neurons'
+        plt.get_current_fig_manager().set_window_title(f'[{NNid}] {plt_title}')
+        plt.suptitle(f'{plt_title}\n{parameters_info}', fontsize=10)
+
+        max_weight = np.max(np.abs(w[0]))
+
+        for i in range(map_num):
+            plt.subplot(rows, columns, i + 1)
+            plt.imshow(NN['w'][0][i].reshape(28, 28), cmap='bwr', aspect='auto', vmin=-max_weight, vmax=max_weight)
+            if i + 1 == map_num: plt.colorbar()
+            plt.axis('off')
+
+        plt.tight_layout()
+        plt.show(block=False)
 
         plt.figure(figsize=(5, 5))
         plt_title = 'Cost and Accuracy vs. Batch Number'
@@ -150,28 +172,6 @@ def on_item_select(event):
             plt.gcf().canvas.draw()
 
         plt.gcf().canvas.mpl_connect('pick_event', on_legend_click)
-
-        plt.tight_layout()
-        plt.show(block=False)
-
-        map_num = NN['hidden_layers'][0]
-        rows = np.floor(np.sqrt(map_num)-0.0001).astype('int')
-        columns = rows + 1
-        if rows * (columns) < map_num:
-            rows += 1
-
-        plt.figure(figsize=((5 / rows) * columns, 5))
-        plt_title = 'Heatmaps of Weights between Each Second-Layer and All Input Neurons'
-        plt.get_current_fig_manager().set_window_title(f'[{NNid}] {plt_title}')
-        plt.suptitle(f'{plt_title}\n{parameters_info}', fontsize=10)
-
-        max_weight = np.max(np.abs(w[0]))
-
-        for i in range(map_num):
-            plt.subplot(rows, columns, i + 1)
-            plt.imshow(NN['w'][0][i].reshape(28, 28), cmap='bwr', aspect='auto', vmin=-max_weight, vmax=max_weight)
-            if i + 1 == map_num: plt.colorbar()
-            plt.axis('off')
 
         plt.tight_layout()
         plt.show()
