@@ -5,8 +5,10 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from PIL import ImageGrab
 from screeninfo import get_monitors
+import inflect
 
 monitors = get_monitors()
+ie = inflect.engine()
 
 mnist = tf.keras.datasets.mnist
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
@@ -15,6 +17,13 @@ x_train = x_train.reshape(-1, 784).astype('float32') / 255.0
 y_train_one_hot = np.eye(10)[y_train]
 
 NN_list = []
+
+def forward_pass(a, layers_num, w, b):
+    z = []
+    for l in range(1, layers_num):
+        z.append(np.dot(w[l - 1], a[l - 1]) + b[l - 1])
+        a.append((np.tanh(z[-1]) + 1) / 2)
+    return a, z
 
 def create_network(hidden_layers, batch_size, learning_rate, noise):
     layers = [784] + hidden_layers + [10]
@@ -41,11 +50,7 @@ def create_network(hidden_layers, batch_size, learning_rate, noise):
             for image_idx in range(first_sample, first_sample + batch_size):
                 y = y_train_one_hot[image_idx]
                 a = [x_train[image_idx] + np.random.uniform(-noise, noise, 784)]
-
-                z = []
-                for l in range(1, len(layers)):
-                    z.append(np.dot(w[l - 1], a[l - 1]) + b[l - 1])
-                    a.append((np.tanh(z[-1]) + 1) / 2)
+                a, z = forward_pass(a, len(layers), w, b)
 
                 costs_sum += np.sum((a[-1] - y) ** 2)
                 if np.argmax(a[-1]) == y_train[image_idx]:
@@ -124,9 +129,10 @@ def on_item_select(event):
     if NNid >= 0:
         NN = NN_list[NNid]
         NNid += 1
-        parameters_info = f'Hidden layers: {NN['hidden_layers']}, Batch size: {NN['batch_size']}, Learning rate: {NN['learning_rate']}, Noise: {NN['noise']}'
+        hidden_layers = NN['hidden_layers']
+        parameters_info = f'Hidden layers: {hidden_layers}, Batch size: {NN['batch_size']}, Learning rate: {NN['learning_rate']}, Noise: {NN['noise']}'
 
-        map_num = NN['hidden_layers'][0]
+        map_num = hidden_layers[0]
         rows = np.floor(np.sqrt(map_num)-0.0001).astype('int')
         columns = rows + 1
         if rows * (columns) < map_num:
@@ -232,7 +238,13 @@ def on_item_select(event):
                         fill=color_hex, outline=color_hex
                     )
 
-            pixelized_image = np.array(pixelized_image) / 255.0
+            a = [np.array(pixelized_image) / -255.0 + 1]
+            a, z = forward_pass(a, len(hidden_layers) + 2, NN['w'], NN['b'])
+            sorted_costs_indices = np.argsort(a[-1])[::-1]
+
+            guesses_listbox.delete(0, tk.END)
+            for rank, i in enumerate(sorted_costs_indices):
+                guesses_listbox.insert(rank, f'#{rank+1} : {ie.number_to_words(i)} (cost : {a[-1][i]})')
 
         drawing_window = tk.Toplevel()
         drawing_window.title(f'[{NNid}] Drawing test')
