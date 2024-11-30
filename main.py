@@ -16,6 +16,8 @@ mnist = tf.keras.datasets.mnist
 x_train = x_train.reshape(-1, 784).astype('float32') / 255.0
 y_train_one_hot = np.eye(10)[y_train]
 
+x_train_average = (np.mean(x_train, axis=0) * 255.0).reshape(28, 28)
+print(x_train_average)
 NN_list = []
 
 def forward_pass(a, layers_num, w, b):
@@ -231,14 +233,21 @@ def on_item_select(event):
 
                     avg_color = tuple(int(c) for c in avg_color)
                     color_hex = f'#{avg_color[0]:02x}{avg_color[1]:02x}{avg_color[2]:02x}'
-                    pixelized_image.append(avg_color[0])
-
                     grid_canvas.create_rectangle(
                         x_start // r, y_start // r, x_end // r, y_end // r,
                         fill=color_hex, outline=color_hex
                     )
 
-            a = [np.array(pixelized_image) / -255.0 + 1]
+                    # color = int(x_train_average[row][col])
+                    # color_hex = f'#{color:02x}{color:02x}{color:02x}'
+                    # test_grid_canvas.create_rectangle(
+                    #     x_start // r, y_start // r, x_end // r, y_end // r,
+                    #     fill=color_hex, outline=color_hex
+                    # )
+
+                    pixelized_image.append(avg_color[0])
+
+            a = [np.array(pixelized_image) / 255.0]
             a, z = forward_pass(a, len(hidden_layers) + 2, NN['w'], NN['b'])
             sorted_costs_indices = np.argsort(a[-1])[::-1]
 
@@ -253,7 +262,7 @@ def on_item_select(event):
         canvas_layout.grid(row=0, column=0, sticky='n')
 
         tk.Label(canvas_layout, text=f'{parameters_info}\nTest the neural network by drawing single digits:', anchor='w').grid(row=0, column=0, sticky='ew')
-        canvas = tk.Canvas(canvas_layout, width=400, height=400, bg='white')
+        canvas = tk.Canvas(canvas_layout, width=400, height=400, bg='black')
         canvas.grid(row=1, column=0)
         canvas.bind("<B1-Motion>", draw)
 
@@ -266,7 +275,7 @@ def on_item_select(event):
         font_size_entry.insert(0, '10')
 
         tk.Label(control_layout, text='color:', anchor='w').grid(row=1, column=0, sticky='w')
-        color_var = tk.StringVar(value='black')
+        color_var = tk.StringVar(value='white')
         color_menu = tk.OptionMenu(control_layout, color_var, 'black', 'white')
         color_menu.grid(row=1, column=1, sticky='ew')
 
@@ -277,8 +286,10 @@ def on_item_select(event):
         read_button.grid(row=2, column=1, sticky='ew')
 
         tk.Label(control_layout, text='read image:', anchor='w').grid(row=3, column=0, sticky='nw')
-        grid_canvas = tk.Canvas(control_layout, width=200, height=200, bg='white')
+        grid_canvas = tk.Canvas(control_layout, width=200, height=200, bg='black')
         grid_canvas.grid(row=3, column=1)
+        # test_grid_canvas = tk.Canvas(control_layout, width=200, height=200, bg='black')
+        # test_grid_canvas.grid(row=3, column=2)
 
         tk.Label(control_layout, text='guesses:', anchor='w').grid(row=4, column=0, sticky='nw')
         guesses_listbox = tk.Listbox(control_layout, height=4)
