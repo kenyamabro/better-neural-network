@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -16,8 +16,14 @@ mnist = tf.keras.datasets.mnist
 x_train = x_train.reshape(-1, 784).astype('float32') / 255.0
 y_train_one_hot = np.eye(10)[y_train]
 
-x_train_average = (np.mean(x_train, axis=0) * 255.0).reshape(28, 28)
-print(x_train_average)
+x_train_average = (np.mean(x_train, axis=0) * 255.0)
+x_train_average = np.array([int(pixel) for pixel in x_train_average]).reshape(28, 28)
+
+colored_area = np.argwhere(x_train_average != 0)
+x_start, y_start = colored_area.min(axis=0)
+x_end, y_end = colored_area.max(axis=0)
+print(f"x_train_average: x_start: {x_start}, x_end: {x_end}, y_start: {y_start}, y_end: {y_end}")
+
 NN_list = []
 
 def forward_pass(a, layers_num, w, b):
@@ -96,8 +102,7 @@ def create_network(hidden_layers, iterations, batch_size, learning_rate, noise):
         'w': w
     })
 
-    NNid = len(NN_list)
-    listbox.insert(NNid, f'#{NNid} : {hidden_layers}, {batch_size}, {learning_rate}, {noise}')
+    listbox.insert(len(NN_list), f'#{len(NN_list)} : {hidden_layers}, {iterations}, {batch_size}, {learning_rate}, {noise}')
 
 def run_training():
     try:
@@ -136,7 +141,7 @@ def on_item_select(event):
         NN = NN_list[NNid]
         NNid += 1
         hidden_layers = NN['hidden_layers']
-        parameters_info = f'Hidden layers: {hidden_layers}, Batches: {NN['iterations']} Batch size: {NN['batch_size']}, Learning rate: {NN['learning_rate']}, Noise: {NN['noise']}'
+        parameters_info = f'Hidden layers: {hidden_layers}, Batches: {NN['iterations']} Batch size: {NN['batch_size']},\nLearning rate: {NN['learning_rate']}, Noise: {NN['noise']}'
 
         map_num = hidden_layers[0]
         rows = np.floor(np.sqrt(map_num)-0.0001).astype('int')
@@ -216,6 +221,12 @@ def on_item_select(event):
 
             image = ImageGrab.grab(bbox=canvas_bbox)
             pixels = np.array(image)
+            pixels = pixels[3:-2, 3:-2] # Cut white borders
+
+            colored_area = np.argwhere(pixels[:, :, :3].any(axis=-1))
+            x_start, y_start = colored_area.min(axis=0)
+            x_end, y_end = colored_area.max(axis=0)
+            print(f"x_start: {x_start}, x_end: {x_end}, y_start: {y_start}, y_end: {y_end}")
 
             grid_canvas.delete("all")
 
@@ -251,6 +262,13 @@ def on_item_select(event):
 
                     pixelized_image.append(avg_color[0])
 
+            pixelized_image = np.array(pixelized_image).reshape(28, 28)
+            colored_area = np.argwhere(pixelized_image != 0)
+            x_start, y_start = colored_area.min(axis=0)
+            x_end, y_end = colored_area.max(axis=0)
+            print(f"x_start: {x_start}, x_end: {x_end}, y_start: {y_start}, y_end: {y_end}")
+
+            pixelized_image = pixelized_image.flatten()
             a = [np.array(pixelized_image) / 255.0]
             a, z = forward_pass(a, len(hidden_layers) + 2, NN['w'], NN['b'])
             sorted_costs_indices = np.argsort(a[-1])[::-1]
@@ -265,18 +283,21 @@ def on_item_select(event):
         canvas_layout = tk.Frame(drawing_window, width=400)
         canvas_layout.grid(row=0, column=0, sticky='n')
 
-        tk.Label(canvas_layout, text=f'{parameters_info}\nTest the neural network by drawing single digits:', anchor='w').grid(row=0, column=0, sticky='ew')
+        tk.Label(canvas_layout, text=f"{parameters_info}\nTest the neural network by drawing single digits\n(You may need to mimic MNIST's digits calligraphy for more accuracy):", anchor='w').grid(row=0, column=0, sticky='ew')
         canvas = tk.Canvas(canvas_layout, width=400, height=400, bg='black')
         canvas.grid(row=1, column=0)
         canvas.bind("<B1-Motion>", draw)
 
+        separator = ttk.Separator(drawing_window, orient='vertical')
+        separator.grid(row=0, column=1, sticky='ns')
+
         control_layout = tk.Frame(drawing_window, width=200)
-        control_layout.grid(row=0, column=1, sticky='n')
+        control_layout.grid(row=0, column=2, sticky='n')
 
         tk.Label(control_layout, text='font size:', anchor='w').grid(row=0, column=0, sticky='w')
         font_size_entry = tk.Entry(control_layout)
         font_size_entry.grid(row=0, column=1, sticky='ew')
-        font_size_entry.insert(0, '10')
+        font_size_entry.insert(0, '15')
 
         tk.Label(control_layout, text='color:', anchor='w').grid(row=1, column=0, sticky='w')
         color_var = tk.StringVar(value='white')
@@ -329,11 +350,13 @@ train_button.grid(row=7, column=0, sticky='ew')
 train_text_var = tk.StringVar(value='')
 tk.Label(root, textvariable=train_text_var, anchor='w').grid(row=7, column=1, sticky='w')
 
+tk.Label(root, text='Double click to open the neural networks:', anchor='w').grid(row=8, column=0, columnspan=2, sticky='w')
+
 listbox = tk.Listbox(root)
-listbox.grid(row=8, column=0, columnspan=2, sticky='ew')
+listbox.grid(row=9, column=0, columnspan=2, sticky='ew')
 listbox.bind("<Double-Button-1>", on_item_select)
 
-placeholder_label = tk.Label(root, text="The trained neural networks will appear here.\nDouble click to open them.", fg="gray", bg="white")
+placeholder_label = tk.Label(root, text="The trained neural networks will appear here.", fg="gray", bg="white")
 root.after(100,
     lambda: placeholder_label.place(
         x=listbox.winfo_x(),
