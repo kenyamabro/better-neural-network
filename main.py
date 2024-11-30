@@ -27,7 +27,7 @@ def forward_pass(a, layers_num, w, b):
         a.append((np.tanh(z[-1]) + 1) / 2)
     return a, z
 
-def create_network(hidden_layers, batch_size, learning_rate, noise):
+def create_network(hidden_layers, iterations, batch_size, learning_rate, noise):
     layers = [784] + hidden_layers + [10]
 
     global w, b, NN_list
@@ -40,9 +40,10 @@ def create_network(hidden_layers, batch_size, learning_rate, noise):
         return 2 / (np.exp(x) + np.exp(-x))
 
     def minimize_cost_function():
+        global x_train
         cost_series = []
         accuracy_series = []
-        for x in range(len(x_train) // batch_size):
+        for x in range(iterations):
             first_sample = batch_size * x
             costs_sum = 0
             accuracy = 0
@@ -50,6 +51,7 @@ def create_network(hidden_layers, batch_size, learning_rate, noise):
             b_gradient = [np.zeros_like(layer) for layer in b]
 
             for image_idx in range(first_sample, first_sample + batch_size):
+                image_idx %= len(x_train)
                 y = y_train_one_hot[image_idx]
                 a = [x_train[image_idx] + np.random.uniform(-noise, noise, 784)]
                 a, z = forward_pass(a, len(layers), w, b)
@@ -84,6 +86,7 @@ def create_network(hidden_layers, batch_size, learning_rate, noise):
 
     NN_list.append({
         'hidden_layers': hidden_layers,
+        'iterations': iterations,
         'batch_size': batch_size,
         'learning_rate': learning_rate,
         'noise': noise,
@@ -99,12 +102,13 @@ def create_network(hidden_layers, batch_size, learning_rate, noise):
 def run_training():
     try:
         hidden_layers = list(map(int, entries[0].get().split(',')))
-        batch_size = int(entries[1].get())
-        learning_rate = float(entries[2].get())
-        noise = float(entries[3].get())
+        iterations = int(entries[1].get())
+        batch_size = int(entries[2].get())
+        learning_rate = float(entries[3].get())
+        noise = float(entries[4].get())
 
         train_text_var.set('Training in Progress...')
-        root.after(100, start_training, hidden_layers, batch_size, learning_rate, noise)
+        root.after(100, start_training, hidden_layers, iterations, batch_size, learning_rate, noise)
     except ValueError as e:
         print(f'ValueError: {e}')
         messagebox.showerror('Input Error', f'Please enter valid numbers. Error: {e}')
@@ -112,8 +116,8 @@ def run_training():
         print(f'Exception: {e}')
         messagebox.showerror('Unexpected Error', f'An unexpected error occurred. Error: {e}')
 
-def start_training(hidden_layers, batch_size, learning_rate, noise):
-    create_network(hidden_layers, batch_size, learning_rate, noise)
+def start_training(hidden_layers, iterations, batch_size, learning_rate, noise):
+    create_network(hidden_layers, iterations, batch_size, learning_rate, noise)
     train_text_var.set('')
     placeholder_label.lower()
 
@@ -132,7 +136,7 @@ def on_item_select(event):
         NN = NN_list[NNid]
         NNid += 1
         hidden_layers = NN['hidden_layers']
-        parameters_info = f'Hidden layers: {hidden_layers}, Batch size: {NN['batch_size']}, Learning rate: {NN['learning_rate']}, Noise: {NN['noise']}'
+        parameters_info = f'Hidden layers: {hidden_layers}, Batches: {NN['iterations']} Batch size: {NN['batch_size']}, Learning rate: {NN['learning_rate']}, Noise: {NN['noise']}'
 
         map_num = hidden_layers[0]
         rows = np.floor(np.sqrt(map_num)-0.0001).astype('int')
@@ -314,18 +318,19 @@ tk.Label(root, text='MNIST dataset\n (28x28 pixels images of\n handwritten singl
 tk.Label(root, text='Datapoints:', anchor='w').grid(row=1, column=0, sticky='w')
 tk.Label(root, text=len(x_train), anchor='w').grid(row=1, column=1, sticky='w')
 
-create_entry('Hidden Layers (comma-separated):', 2, '20,20')
-create_entry('Batch Size:', 3, '50')
-create_entry('Learning Rate:', 4, '0.4')
-create_entry('Noise:', 5, '0')
+create_entry('Hidden Layers (Comma-Separated):', 2, '20,20')
+create_entry('Batches (Iterations):', 3, '1200')
+create_entry('Batch Size:', 4, '50')
+create_entry('Learning Rate:', 5, '0.4')
+create_entry('Noise:', 6, '0')
 
 train_button = tk.Button(root, text='Train', command=run_training)
-train_button.grid(row=6, column=0, sticky='ew')
+train_button.grid(row=7, column=0, sticky='ew')
 train_text_var = tk.StringVar(value='')
-tk.Label(root, textvariable=train_text_var, anchor='w').grid(row=6, column=1, sticky='w')
+tk.Label(root, textvariable=train_text_var, anchor='w').grid(row=7, column=1, sticky='w')
 
 listbox = tk.Listbox(root)
-listbox.grid(row=7, column=0, columnspan=2, sticky='ew')
+listbox.grid(row=8, column=0, columnspan=2, sticky='ew')
 listbox.bind("<Double-Button-1>", on_item_select)
 
 placeholder_label = tk.Label(root, text="The trained neural networks will appear here.\nDouble click to open them.", fg="gray", bg="white")
