@@ -16,7 +16,6 @@ mnist = tf.keras.datasets.mnist
 x_train = x_train.reshape(-1, 784).astype('float32') / 255.0
 y_train_one_hot = np.eye(10)[y_train]
 
-<<<<<<< HEAD
 avg_x_train = (np.mean(x_train, axis=0) * 255.0)
 avg_x_train = np.array([int(pixel) for pixel in avg_x_train]).reshape(28, 28)
 
@@ -33,15 +32,6 @@ strip_ratios.append(x_start / avg_width)
 strip_ratios.append((28 - x_end) / avg_width)
 strip_ratios.append(y_start / avg_height)
 strip_ratios.append((28 - y_end) / avg_height)
-=======
-x_train_average = (np.mean(x_train, axis=0) * 255.0)
-x_train_average = np.array([int(pixel) for pixel in x_train_average]).reshape(28, 28)
-
-colored_area = np.argwhere(x_train_average != 0)
-x_start, y_start = colored_area.min(axis=0)
-x_end, y_end = colored_area.max(axis=0)
-print(f"x_train_average: x_start: {x_start}, x_end: {x_end}, y_start: {y_start}, y_end: {y_end}")
->>>>>>> 30fa76ea44bf8994895cec32ce5e71d26e1499b4
 
 NN_list = []
 
@@ -241,7 +231,6 @@ def on_item_select(event):
             pixels = pixels[3:-2, 3:-2] # Cut white borders
 
             colored_area = np.argwhere(pixels[:, :, :3].any(axis=-1))
-<<<<<<< HEAD
             y_start, x_start = colored_area.min(axis=0)
             y_end, x_end = colored_area.max(axis=0)
             pixels = pixels[y_start:y_end + 1, x_start:x_end + 1]
@@ -274,11 +263,6 @@ def on_item_select(event):
 
             grid_size = pixels.shape[0] / 28
             r = grid_size * 28 / grid_canvas.winfo_width()
-=======
-            x_start, y_start = colored_area.min(axis=0)
-            x_end, y_end = colored_area.max(axis=0)
-            print(f"x_start: {x_start}, x_end: {x_end}, y_start: {y_start}, y_end: {y_end}")
->>>>>>> 30fa76ea44bf8994895cec32ce5e71d26e1499b4
 
             grid_canvas.delete("all")
             pixelized_image = []
