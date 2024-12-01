@@ -289,7 +289,6 @@ def on_item_select(event):
             colored_area = np.argwhere(pixelized_image != 0)
             x_start, y_start = colored_area.min(axis=0)
             x_end, y_end = colored_area.max(axis=0)
-            print(f"x_start: {x_start}, x_end: {x_end}, y_start: {y_start}, y_end: {y_end}")
 
             pixelized_image = pixelized_image.flatten()
             a = [np.array(pixelized_image) / 255.0]
