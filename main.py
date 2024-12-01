@@ -3,7 +3,7 @@ from tkinter import messagebox, ttk
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
-from PIL import ImageGrab
+from PIL import Image, ImageGrab
 from screeninfo import get_monitors
 import inflect
 
@@ -16,13 +16,22 @@ mnist = tf.keras.datasets.mnist
 x_train = x_train.reshape(-1, 784).astype('float32') / 255.0
 y_train_one_hot = np.eye(10)[y_train]
 
-x_train_average = (np.mean(x_train, axis=0) * 255.0)
-x_train_average = np.array([int(pixel) for pixel in x_train_average]).reshape(28, 28)
+avg_x_train = (np.mean(x_train, axis=0) * 255.0)
+avg_x_train = np.array([int(pixel) for pixel in avg_x_train]).reshape(28, 28)
 
-colored_area = np.argwhere(x_train_average != 0)
-x_start, y_start = colored_area.min(axis=0)
-x_end, y_end = colored_area.max(axis=0)
-print(f"x_train_average: x_start: {x_start}, x_end: {x_end}, y_start: {y_start}, y_end: {y_end}")
+# colored_area = np.argwhere(avg_x_train != 0)
+# x_start, y_start = colored_area.min(axis=0)
+# x_end, y_end = colored_area.max(axis=0)
+# These values are constant, and it takes a few seconds to compute them, so I will write them directly.
+x_start, x_end, y_start, y_end = 2, 26, 3, 25
+avg_width = (x_end - x_start)
+avg_height = (y_end - y_start)
+avg_w_over_h = (avg_width) / (avg_height)
+strip_ratios = []
+strip_ratios.append(x_start / avg_width)
+strip_ratios.append((28 - x_end) / avg_width)
+strip_ratios.append(y_start / avg_height)
+strip_ratios.append((28 - y_end) / avg_height)
 
 NN_list = []
 
@@ -215,8 +224,6 @@ def on_item_select(event):
             canvas_width = canvas.winfo_width()
             canvas_height = canvas.winfo_height()
 
-            r = canvas_width / grid_canvas.winfo_width()
-
             canvas_bbox = (canvas_x, canvas_y, canvas_x + canvas_width, canvas_y + canvas_height)
 
             image = ImageGrab.grab(bbox=canvas_bbox)
@@ -224,23 +231,48 @@ def on_item_select(event):
             pixels = pixels[3:-2, 3:-2] # Cut white borders
 
             colored_area = np.argwhere(pixels[:, :, :3].any(axis=-1))
-            x_start, y_start = colored_area.min(axis=0)
-            x_end, y_end = colored_area.max(axis=0)
-            print(f"x_start: {x_start}, x_end: {x_end}, y_start: {y_start}, y_end: {y_end}")
+            y_start, x_start = colored_area.min(axis=0)
+            y_end, x_end = colored_area.max(axis=0)
+            pixels = pixels[y_start:y_end + 1, x_start:x_end + 1]
+
+            width = x_end - x_start
+            height = y_end - y_start
+            w_over_h = width / height
+
+            def add_black_strips(image_array, strip_thickness, wider):
+                if wider: # Vertical strips
+                    strip = np.zeros((image_array.shape[0], strip_thickness, image_array.shape[2]), dtype=image_array.dtype)
+                    return np.hstack((strip, image_array, strip))
+                else: # Horizontal strips
+                    strip = np.zeros((strip_thickness, image_array.shape[1], image_array.shape[2]), dtype=image_array.dtype)
+                    return np.vstack((strip, image_array, strip))
+
+            wider = w_over_h > avg_w_over_h
+
+            # Add black strips to larger side
+            side = width if wider else height
+            strip1 = int(strip_ratios[2 * int(not wider)] * side)
+            strip2 = int(strip_ratios[2 * int(not wider) + 1] * side)
+            pixels = add_black_strips(pixels, strip1, wider)
+            pixels = add_black_strips(pixels, strip2, wider)
+
+            # Add strips to form a square
+            diff = pixels.shape[int(wider)] - pixels.shape[int(not wider)]
+            half_diff = diff // 2
+            pixels = add_black_strips(pixels, half_diff, not wider)
+
+            grid_size = pixels.shape[0] / 28
+            r = grid_size * 28 / grid_canvas.winfo_width()
 
             grid_canvas.delete("all")
-
-            grid_size_x = canvas_width // 28
-            grid_size_y = canvas_height // 28
-
             pixelized_image = []
 
             for row in range(28):
                 for col in range(28):
-                    x_start = col * grid_size_x
-                    x_end = (col + 1) * grid_size_x
-                    y_start = row * grid_size_y
-                    y_end = (row + 1) * grid_size_y
+                    x_start = int(col * grid_size)
+                    x_end = int((col + 1) * grid_size)
+                    y_start = int(row * grid_size)
+                    y_end = int((row + 1) * grid_size)
 
                     cell_pixels = pixels[y_start:y_end, x_start:x_end]
 
@@ -253,29 +285,15 @@ def on_item_select(event):
                         fill=color_hex, outline=color_hex
                     )
 
-                    # color = int(x_train_average[row][col])
-                    # color_hex = f'#{color:02x}{color:02x}{color:02x}'
-                    # test_grid_canvas.create_rectangle(
-                    #     x_start // r, y_start // r, x_end // r, y_end // r,
-                    #     fill=color_hex, outline=color_hex
-                    # )
-
                     pixelized_image.append(avg_color[0])
 
-            pixelized_image = np.array(pixelized_image).reshape(28, 28)
-            colored_area = np.argwhere(pixelized_image != 0)
-            x_start, y_start = colored_area.min(axis=0)
-            x_end, y_end = colored_area.max(axis=0)
-            print(f"x_start: {x_start}, x_end: {x_end}, y_start: {y_start}, y_end: {y_end}")
-
-            pixelized_image = pixelized_image.flatten()
             a = [np.array(pixelized_image) / 255.0]
             a, z = forward_pass(a, len(hidden_layers) + 2, NN['w'], NN['b'])
             sorted_costs_indices = np.argsort(a[-1])[::-1]
 
             guesses_listbox.delete(0, tk.END)
             for rank, i in enumerate(sorted_costs_indices):
-                guesses_listbox.insert(rank, f'#{rank+1} : {ie.number_to_words(i)} (cost : {a[-1][i]})')
+                guesses_listbox.insert(rank, f'#{rank+1} : {ie.number_to_words(i)} (activation : {a[-1][i]})')
 
         drawing_window = tk.Toplevel()
         drawing_window.title(f'[{NNid}] Drawing test')
@@ -313,8 +331,6 @@ def on_item_select(event):
         tk.Label(control_layout, text='read image:', anchor='w').grid(row=3, column=0, sticky='nw')
         grid_canvas = tk.Canvas(control_layout, width=200, height=200, bg='black')
         grid_canvas.grid(row=3, column=1)
-        # test_grid_canvas = tk.Canvas(control_layout, width=200, height=200, bg='black')
-        # test_grid_canvas.grid(row=3, column=2)
 
         tk.Label(control_layout, text='guesses:', anchor='w').grid(row=4, column=0, sticky='nw')
         guesses_listbox = tk.Listbox(control_layout, height=4)
