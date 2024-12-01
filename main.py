@@ -306,7 +306,7 @@ def on_item_select(event):
         canvas_layout = tk.Frame(drawing_window, width=400)
         canvas_layout.grid(row=0, column=0, sticky='n')
 
-        tk.Label(canvas_layout, text=f"{parameters_info}\nTest the neural network by drawing single digits\n(You may need to mimic MNIST's digits calligraphy for more accuracy):", anchor='w').grid(row=0, column=0, sticky='ew')
+        tk.Label(canvas_layout, text=f"{parameters_info}\nTest the neural network by drawing single digits:", anchor='w').grid(row=0, column=0, sticky='ew')
         canvas = tk.Canvas(canvas_layout, width=400, height=400, bg='black')
         canvas.grid(row=1, column=0)
         canvas.bind("<B1-Motion>", draw)
@@ -333,12 +333,12 @@ def on_item_select(event):
         read_button = tk.Button(control_layout, text='Read', command=read_canvas)
         read_button.grid(row=2, column=1, sticky='ew')
 
-        tk.Label(control_layout, text='read image:', anchor='w').grid(row=3, column=0, sticky='nw')
+        tk.Label(control_layout, text='read image:\n(resized and\ncentered for\nmore accuracy,\nbut not\nreshaped!)', anchor='w').grid(row=3, column=0, sticky='nw')
         grid_canvas = tk.Canvas(control_layout, width=200, height=200, bg='black')
         grid_canvas.grid(row=3, column=1)
 
         tk.Label(control_layout, text='guesses:', anchor='w').grid(row=4, column=0, sticky='nw')
-        guesses_listbox = tk.Listbox(control_layout, height=4)
+        guesses_listbox = tk.Listbox(control_layout, height=4, width=15)
         guesses_listbox.grid(row=4, column=1, sticky='ew')
         guesses_placeholder_label = tk.Label(control_layout, text="Read your drawing first", fg="gray", bg="white")
         control_layout.after(100,
