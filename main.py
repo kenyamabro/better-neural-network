@@ -19,11 +19,9 @@ y_train_one_hot = np.eye(10)[y_train]
 avg_x_train = (np.mean(x_train, axis=0) * 255.0)
 avg_x_train = np.array([int(pixel) for pixel in avg_x_train]).reshape(28, 28)
 
-# colored_area = np.argwhere(avg_x_train != 0)
-# x_start, y_start = colored_area.min(axis=0)
-# x_end, y_end = colored_area.max(axis=0)
-# These values are constant, and it takes a few seconds to compute them, so I will write them directly.
-x_start, x_end, y_start, y_end = 2, 26, 3, 25
+colored_area = np.argwhere(avg_x_train != 0)
+x_start, y_start = colored_area.min(axis=0)
+x_end, y_end = colored_area.max(axis=0)
 avg_width = (x_end - x_start)
 avg_height = (y_end - y_start)
 avg_w_over_h = (avg_width) / (avg_height)
