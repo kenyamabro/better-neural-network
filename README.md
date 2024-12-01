@@ -1,11 +1,12 @@
-This project implements a Fully Connected Neural Network with the algorithm built from scratch, without using high-level ML libraries. 
-The network is trained on the MNIST dataset.
-The home window has entries to customize these 4 parameters : hidden layers (number of layers and number of neurons per layer), learning rate, batch size and noise. 
-After training, the neural network is stored on a list.
+This project implements a Fully Connected Neural Network with the algorithm built from scratch (using some basic numpy functions), without using high-level ML libraries. 
+The network is trained on the MNIST dataset (60000 28x28 pixels images of handwritten digits).
+The home window has entries to customize these 5 parameters : hidden layers (number of layers and number of neurons per layer), batch number (iterations), batch size, learning rate and noise.
+  
+After training, the neural network is stored on a listbox.
 Clicking on a neural network in the list will display the following:
-  - Drawing interface where the neural network guesses the digit that is drawn.
+  - Drawing interface where the neural network guesses the digit that is drawn (the drawing interface is built from scratch too)
   - Plot of accuracy and average cost per output neuron vs. batch number
-  - Heatmaps of the weights between each second-layer neuron and all input neurons
+  - Heatmaps of the weights between each second-layer neuron and all input neurons (visual representation of the weights attributed to each pixel in the images by each second-layer neuron)
 
 Interface libraries used:
   - Tkinter in general
