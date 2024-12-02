@@ -7,13 +7,13 @@ import interfaces
 def run_training():
     try:
         hidden_layers = list(map(int, entries[0].get().split(',')))
-        iterations = int(entries[1].get())
+        batches = int(entries[1].get())
         batch_size = int(entries[2].get())
         learning_rate = float(entries[3].get())
         noise = float(entries[4].get())
 
         train_text_var.set('Training in Progress...')
-        root.after(100, start_training, hidden_layers, iterations, batch_size, learning_rate, noise)
+        root.after(100, start_training, hidden_layers, batches, batch_size, learning_rate, noise)
     except ValueError as e:
         print(f'ValueError: {e}')
         messagebox.showerror('Input Error', f'Please enter valid numbers. Error: {e}')
@@ -21,11 +21,11 @@ def run_training():
         print(f'Exception: {e}')
         messagebox.showerror('Unexpected Error', f'An unexpected error occurred. Error: {e}')
 
-def start_training(hidden_layers, iterations, batch_size, learning_rate, noise):
-    network.create_network(hidden_layers, iterations, batch_size, learning_rate, noise)
+def start_training(hidden_layers, batches, batch_size, learning_rate, noise):
+    network.create_network(hidden_layers, batches, batch_size, learning_rate, noise)
     train_text_var.set('')
     placeholder_label.lower()
-    listbox.insert(len(network.NN_list), f'#{len(network.NN_list)} : {hidden_layers}, {iterations}, {batch_size}, {learning_rate}, {noise}')
+    listbox.insert(len(network.NN_list), f'#{len(network.NN_list)} : {hidden_layers}, {batches}, {batch_size}, {learning_rate}, {noise}')
 
 def create_entry(text, row, default_entry):
     tk.Label(root, text=text, anchor='w').grid(row=row, column=0, sticky='w')

@@ -31,7 +31,7 @@ def forward_pass(a, layers_num, w, b):
         a.append((np.tanh(z[-1]) + 1) / 2)
     return a, z
 
-def create_network(hidden_layers, iterations, batch_size, learning_rate, noise):
+def create_network(hidden_layers, batches, batch_size, learning_rate, noise):
     layers = [784] + hidden_layers + [10]
 
     global w, b, NN_list
@@ -47,7 +47,7 @@ def create_network(hidden_layers, iterations, batch_size, learning_rate, noise):
         global x_train
         cost_series = []
         accuracy_series = []
-        for x in range(iterations):
+        for x in range(batches):
             first_sample = batch_size * x
             costs_sum = 0
             accuracy = 0
@@ -90,7 +90,7 @@ def create_network(hidden_layers, iterations, batch_size, learning_rate, noise):
 
     NN_list.append({
         'hidden_layers': hidden_layers,
-        'iterations': iterations,
+        'iterations': batches,
         'batch_size': batch_size,
         'learning_rate': learning_rate,
         'noise': noise,
