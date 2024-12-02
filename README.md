@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 This project implements a Fully Connected Neural Network with the algorithm built from scratch (using some basic numpy functions), without using high-level ML libraries.
-=======
-This project implements a Fully Connected Neural Network with the algorithm built from scratch, without using high-level ML libraries. 
->>>>>>> dd83b336f5e3ff7394bb9974ed094bfc0f57c880
 The network is trained on the MNIST dataset (60000 28x28 pixels images of handwritten digits).
 The home window has entries to customize these 5 parameters : hidden layers (number of layers and number of neurons per layer), batch number, batch size, learning rate and noise.
   
