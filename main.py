@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import network
 import plots
-import interfaces
+import drawing_interface
 
 def run_training():
     try:
@@ -45,7 +45,7 @@ def on_item_select(event):
 
         plots.create_cost_acuracy_plot(NNid, NN, parameters_info)
         plots.create_weights_heatmap(NNid, NN, parameters_info)
-        interfaces.create_drawing_interface(NNid, NN, parameters_info)
+        drawing_interface.create_drawing_interface(NNid, NN, parameters_info)
 
 root = tk.Tk()
 root.title('Neural Network Trainer')
