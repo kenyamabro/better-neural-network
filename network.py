@@ -1,40 +1,21 @@
 import numpy as np
-import tensorflow as tf
+import image_processor
+import time
+import global_values
 
-mnist = tf.keras.datasets.mnist
-(x_train, y_train), (x_test, y_test) = mnist.load_data()
-
-x_train = x_train.reshape(-1, 784).astype('float32') / 255.0
-y_train_one_hot = np.eye(10)[y_train]
-
-avg_x_train = (np.mean(x_train, axis=0) * 255.0)
-avg_x_train = np.array([int(pixel) for pixel in avg_x_train]).reshape(28, 28)
-
-colored_area = np.argwhere(avg_x_train != 0)
-x_start, y_start = colored_area.min(axis=0)
-x_end, y_end = colored_area.max(axis=0)
-avg_width = (x_end - x_start)
-avg_height = (y_end - y_start)
-avg_w_over_h = (avg_width) / (avg_height)
-strip_ratios = []
-strip_ratios.append(x_start / avg_width)
-strip_ratios.append((28 - x_end) / avg_width)
-strip_ratios.append(y_start / avg_height)
-strip_ratios.append((28 - y_end) / avg_height)
-
-NN_list = []
-
-def forward_pass(a, layers_num, w, b):
+def forward_pass(a, layers_num, w, b, AF):
     z = []
     for l in range(1, layers_num):
         z.append(np.dot(w[l - 1], a[l - 1]) + b[l - 1])
-        a.append((np.tanh(z[-1]) + 1) / 2)
+        a.append(AF(z[-1]))
     return a, z
 
 def create_network(hidden_layers, batches, batch_size, learning_rate, noise):
     layers = [784] + hidden_layers + [10]
+    # layers = [global_values.inputs_num] + hidden_layers + [10]
+    # layers = [196] + hidden_layers + [10]
 
-    global w, b, NN_list
+    global w, b
     w = [np.random.uniform(-1, 1, (layers[i + 1], layers[i]))
          for i in range(len(layers) - 1)]
     b = [np.random.uniform(-0.5, 0.5, layers[i + 1])
@@ -44,7 +25,6 @@ def create_network(hidden_layers, batches, batch_size, learning_rate, noise):
         return 2 / (np.exp(x) + np.exp(-x))
 
     def minimize_cost_function():
-        global x_train
         cost_series = []
         accuracy_series = []
         for x in range(batches):
@@ -53,15 +33,22 @@ def create_network(hidden_layers, batches, batch_size, learning_rate, noise):
             accuracy = 0
             w_gradient = [np.zeros_like(layer) for layer in w]
             b_gradient = [np.zeros_like(layer) for layer in b]
+            # runtime = 0
 
             for image_idx in range(first_sample, first_sample + batch_size):
-                image_idx %= len(x_train)
-                y = y_train_one_hot[image_idx]
-                a = [x_train[image_idx] + np.random.uniform(-noise, noise, 784)]
-                a, z = forward_pass(a, len(layers), w, b)
+                image_idx %= len(global_values.x_train)
+                y = global_values.y_train_one_hot[image_idx]
+                # image = np.array(global_values.x_train[image_idx] + np.random.uniform(-noise, noise, 784)).reshape(28, 28)
+                # # start_time = time.time()
+                # a = [image_processor.max_pool(image, 2, 2).flatten()]
+                # # end_time = time.time()
+                # # runtime += end_time - start_time
+
+                a = [global_values.x_train[image_idx] + np.random.uniform(-noise, noise, 784)]
+                a, z = forward_pass(a, len(layers), w, b, global_values.AFs('logistic sigmoid'))
 
                 costs_sum += np.sum((a[-1] - y) ** 2)
-                if np.argmax(a[-1]) == y_train[image_idx]:
+                if np.argmax(a[-1]) == global_values.y_train[image_idx]:
                     accuracy += 1
 
                 cost_z = [None] * len(w)
@@ -84,11 +71,14 @@ def create_network(hidden_layers, batches, batch_size, learning_rate, noise):
             cost_series.append(cost)
             accuracy_series.append(accuracy)
 
+            # print(f'{x}# time : {runtime}, cost : {cost}, accuracy : {accuracy}')
+            print(f'{x}# cost : {cost}, accuracy : {accuracy}')
+
         return cost_series, accuracy_series
 
     cost_series, accuracy_series = minimize_cost_function()
 
-    NN_list.append({
+    global_values.NN_list.append({
         'hidden_layers': hidden_layers,
         'iterations': batches,
         'batch_size': batch_size,

@@ -6,6 +6,7 @@ from screeninfo import get_monitors
 import inflect
 import network
 import image_processor
+import global_values
 
 monitors = get_monitors()
 ie = inflect.engine()
@@ -36,6 +37,7 @@ def create_drawing_interface(NNid, NN, parameters_info):
         pixels = pixels[3:-2, 3:-2] # Cut white borders
 
         pixels = image_processor.center_image(pixels)
+
         grid_size = pixels.shape[0] / 28
         r = grid_size * 28 / grid_canvas.winfo_width()
 
@@ -62,8 +64,12 @@ def create_drawing_interface(NNid, NN, parameters_info):
 
                 pixelized_image.append(avg_color[0])
 
+        # pixelized_image = np.array(pixelized_image).reshape(28, 28)
+        # simplified_image = image_processor.extract_feature(pixelized_image)
+
+        # a = [np.array(simplified_image) / 255.0]
         a = [np.array(pixelized_image) / 255.0]
-        a, z = network.forward_pass(a, len(NN['hidden_layers']) + 2, NN['w'], NN['b'])
+        a, z = network.forward_pass(a, len(NN['hidden_layers']) + 2, NN['w'], NN['b'], global_values.AFs('logistic sigmoid'))
         sorted_costs_indices = np.argsort(a[-1])[::-1]
 
         guesses_listbox.delete(0, tk.END)
