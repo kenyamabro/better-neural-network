@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def create_cost_acuracy_plot(NNid, NN, parameters_info):
+def create_weights_heatmap(NNid, NN, parameters_info):
     map_num = NN['hidden_layers'][0]
     rows = np.floor(np.sqrt(map_num)-0.0001).astype('int')
     columns = rows + 1
@@ -24,7 +24,7 @@ def create_cost_acuracy_plot(NNid, NN, parameters_info):
     plt.tight_layout()
     plt.show(block=False)
 
-def create_weights_heatmap(NNid, NN, parameters_info):
+def create_cost_acuracy_plot(NNid, NN, parameters_info):
     plt.figure(figsize=(5, 5))
     plt_title = 'Cost and Accuracy vs. Batch Number'
     plt.get_current_fig_manager().set_window_title(f'[{NNid}] {plt_title}')
