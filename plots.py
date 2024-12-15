@@ -14,10 +14,11 @@ def create_weights_heatmap(NNid, NN, parameters_info):
     plt.suptitle(f'{plt_title}\n{parameters_info}', fontsize=10)
 
     max_weight = np.max(np.abs(NN['w'][0]))
+    side = int(np.sqrt(NN['w'][0].shape[1]))
 
     for i in range(map_num):
         plt.subplot(rows, columns, i + 1)
-        plt.imshow(NN['w'][0][i].reshape(28, 28), cmap='bwr', aspect='auto', vmin=-max_weight, vmax=max_weight)
+        plt.imshow(NN['w'][0][i].reshape(side, side), cmap='bwr', aspect='auto', vmin=-max_weight, vmax=max_weight)
         if i + 1 == map_num: plt.colorbar()
         plt.axis('off')
 
