@@ -3,6 +3,7 @@ from tkinter import messagebox
 import network
 import plots
 import drawing_interface
+import global_values
 
 def run_training():
     try:
@@ -25,7 +26,7 @@ def start_training(hidden_layers, batches, batch_size, learning_rate, noise):
     network.create_network(hidden_layers, batches, batch_size, learning_rate, noise)
     train_text_var.set('')
     placeholder_label.lower()
-    listbox.insert(len(network.NN_list), f'#{len(network.NN_list)} : {hidden_layers}, {batches}, {batch_size}, {learning_rate}, {noise}')
+    listbox.insert(len(global_values.NN_list), f'#{len(global_values.NN_list)} : {hidden_layers}, {batches}, {batch_size}, {learning_rate}, {noise}')
 
 def create_entry(text, row, default_entry):
     tk.Label(root, text=text, anchor='w').grid(row=row, column=0, sticky='w')
@@ -39,12 +40,12 @@ def on_item_select(event):
     NNid = widget.nearest(event.y)
 
     if NNid >= 0:
-        NN = network.NN_list[NNid]
+        NN = global_values.NN_list[NNid]
         NNid += 1
         parameters_info = f'Hidden layers: {NN['hidden_layers']}, Batches: {NN['iterations']} Batch size: {NN['batch_size']},\nLearning rate: {NN['learning_rate']}, Noise: {NN['noise']}'
 
-        plots.create_cost_acuracy_plot(NNid, NN, parameters_info)
         plots.create_weights_heatmap(NNid, NN, parameters_info)
+        plots.create_cost_acuracy_plot(NNid, NN, parameters_info)
         drawing_interface.create_drawing_interface(NNid, NN, parameters_info)
 
 root = tk.Tk()
@@ -55,7 +56,7 @@ tk.Label(root, text='Dataset used:', anchor='w').grid(row=0, column=0, sticky='n
 tk.Label(root, text='MNIST dataset\n (28x28 pixels images of\n handwritten single digits)', anchor='w').grid(row=0, column=1, sticky='w')
 
 tk.Label(root, text='Datapoints:', anchor='w').grid(row=1, column=0, sticky='w')
-tk.Label(root, text=len(network.x_train), anchor='w').grid(row=1, column=1, sticky='w')
+tk.Label(root, text=len(global_values.x_train), anchor='w').grid(row=1, column=1, sticky='w')
 
 create_entry('Hidden Layers (Comma-Separated):', 2, '20,20')
 create_entry('Batches:', 3, '1200')
