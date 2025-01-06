@@ -33,28 +33,12 @@ def create_drawing_interface(NNid, NN, parameters_info):
 
         canvas_bbox = (canvas_x, canvas_y, canvas_x + canvas_width, canvas_y + canvas_height)
 
-        pixelized_image = []
-
         image = ImageGrab.grab(bbox=canvas_bbox)
         pixels = np.array(image)
         pixels = pixels[3:-2, 3:-2] # Cut white borders
 
         pixels = image_processor.center_image(pixels)
-
-        grid_size = pixels.shape[0] / 28
-
-        for row in range(28):
-            for col in range(28):
-                x_start = int(col * grid_size)
-                x_end = int((col + 1) * grid_size)
-                y_start = int(row * grid_size)
-                y_end = int((row + 1) * grid_size)
-
-                cell_pixels = pixels[y_start:y_end, x_start:x_end]
-
-                avg_color = np.mean(cell_pixels, axis=(0, 1))
-
-                pixelized_image.append(avg_color[0])
+        pixelized_image = image_processor.pixelize_image(pixels)
 
         output_image = Image.new("L", (28, 28))
         output_image.putdata(pixelized_image)

@@ -72,7 +72,7 @@ def create_network(hidden_layers, batches, batch_size, learning_rate, noise):
             accuracy_series.append(accuracy)
 
             # print(f'{x}# time : {runtime}, cost : {cost}, accuracy : {accuracy}')
-            print(f'{x}# cost : {cost}, accuracy : {accuracy}')
+            # print(f'{x}# cost : {cost}, accuracy : {accuracy}')
 
         return cost_series, accuracy_series
 
