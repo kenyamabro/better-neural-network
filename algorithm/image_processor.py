@@ -2,6 +2,25 @@ import numpy as np
 import time
 import global_values
 
+def pixelize_image(pixels):
+    pixelized_image = []
+    grid_size = pixels.shape[0] / 28
+
+    for row in range(28):
+        for col in range(28):
+            x_start = int(col * grid_size)
+            x_end = int((col + 1) * grid_size)
+            y_start = int(row * grid_size)
+            y_end = int((row + 1) * grid_size)
+
+            cell_pixels = pixels[y_start:y_end, x_start:x_end]
+
+            avg_color = np.mean(cell_pixels, axis=(0, 1))
+
+            pixelized_image.append(avg_color[0])
+
+    return pixelized_image
+
 def add_black_strips(image_array, strip_thickness, wider):
     if wider: # Vertical strips
         strip = np.zeros((image_array.shape[0], strip_thickness, image_array.shape[2]), dtype=image_array.dtype)
@@ -33,25 +52,6 @@ def center_image(pixels):
     pixels = add_black_strips(pixels, strip, not wider)
 
     return pixels
-
-def pixelize_image(pixels):
-    pixelized_image = []
-    grid_size = pixels.shape[0] / 28
-
-    for row in range(28):
-        for col in range(28):
-            x_start = int(col * grid_size)
-            x_end = int((col + 1) * grid_size)
-            y_start = int(row * grid_size)
-            y_end = int((row + 1) * grid_size)
-
-            cell_pixels = pixels[y_start:y_end, x_start:x_end]
-
-            avg_color = np.mean(cell_pixels, axis=(0, 1))
-
-            pixelized_image.append(avg_color[0])
-
-    return pixelized_image
 
 def extract_feature(initial_image):
     images = np.array([initial_image])

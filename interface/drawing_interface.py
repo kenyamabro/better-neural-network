@@ -12,6 +12,18 @@ monitors = get_monitors()
 ie = inflect.engine()
 
 def create_drawing_interface(NNid, NN, parameters_info):
+    def grab_canvas_image():
+        canvas_x = canvas.winfo_rootx()
+        canvas_y = canvas.winfo_rooty()
+        canvas_width = canvas.winfo_width()
+        canvas_height = canvas.winfo_height()
+
+        canvas_bbox = (canvas_x, canvas_y, canvas_x + canvas_width, canvas_y + canvas_height)
+
+        image = ImageGrab.grab(bbox=canvas_bbox)
+        pixels = np.array(image)
+        return pixels[3:-2, 3:-2] # Cut white borders
+
     def draw(event):
         x, y = event.x, event.y
         try: fs = int(font_size_entry.get())
@@ -26,33 +38,23 @@ def create_drawing_interface(NNid, NN, parameters_info):
         guesses_placeholder_label.lower()
         grid_canvas.delete("all")
 
-        canvas_x = canvas.winfo_rootx()
-        canvas_y = canvas.winfo_rooty()
-        canvas_width = canvas.winfo_width()
-        canvas_height = canvas.winfo_height()
-
-        canvas_bbox = (canvas_x, canvas_y, canvas_x + canvas_width, canvas_y + canvas_height)
-
-        image = ImageGrab.grab(bbox=canvas_bbox)
-        pixels = np.array(image)
-        pixels = pixels[3:-2, 3:-2] # Cut white borders
-
+        pixels = grab_canvas_image()
         pixels = image_processor.center_image(pixels)
-        pixelized_image = image_processor.pixelize_image(pixels)
+        pixels = image_processor.pixelize_image(pixels)
 
-        output_image = Image.new("L", (28, 28))
-        output_image.putdata(pixelized_image)
-        output_image = output_image.resize((grid_canvas.winfo_width(), grid_canvas.winfo_height()), Image.NEAREST)
+        image = Image.new("L", (28, 28))
+        image.putdata(pixels)
+        image = image.resize((grid_canvas.winfo_width(), grid_canvas.winfo_height()), Image.NEAREST)
 
-        tk_image = ImageTk.PhotoImage(output_image)
-        grid_canvas.create_image(0, 0, anchor="nw", image=tk_image)
-        grid_canvas.image = tk_image
+        image = ImageTk.PhotoImage(image)
+        grid_canvas.create_image(0, 0, anchor="nw", image=image)
+        grid_canvas.image = image
 
         # pixelized_image = np.array(pixelized_image).reshape(28, 28)
         # simplified_image = image_processor.extract_feature(pixelized_image)
 
         # a = [np.array(simplified_image) / 255.0]
-        a = [np.array(pixelized_image) / 255.0]
+        a = [np.array(pixels) / 255.0]
         a, z = network.forward_pass(a, len(NN['hidden_layers']) + 2, NN['w'], NN['b'], global_values.AFs('logistic', k = 2))
         sorted_costs_indices = np.argsort(a[-1])[::-1]
 
