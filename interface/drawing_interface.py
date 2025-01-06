@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import numpy as np
-from PIL import ImageGrab
+from PIL import Image, ImageGrab, ImageTk
 from screeninfo import get_monitors
 import inflect
 import algorithm.network as network
@@ -24,6 +24,7 @@ def create_drawing_interface(NNid, NN, parameters_info):
 
     def read_canvas():
         guesses_placeholder_label.lower()
+        grid_canvas.delete("all")
 
         canvas_x = canvas.winfo_rootx()
         canvas_y = canvas.winfo_rooty()
@@ -32,6 +33,8 @@ def create_drawing_interface(NNid, NN, parameters_info):
 
         canvas_bbox = (canvas_x, canvas_y, canvas_x + canvas_width, canvas_y + canvas_height)
 
+        pixelized_image = []
+
         image = ImageGrab.grab(bbox=canvas_bbox)
         pixels = np.array(image)
         pixels = pixels[3:-2, 3:-2] # Cut white borders
@@ -39,10 +42,6 @@ def create_drawing_interface(NNid, NN, parameters_info):
         pixels = image_processor.center_image(pixels)
 
         grid_size = pixels.shape[0] / 28
-        r = grid_size * 28 / grid_canvas.winfo_width()
-
-        grid_canvas.delete("all")
-        pixelized_image = []
 
         for row in range(28):
             for col in range(28):
@@ -55,14 +54,15 @@ def create_drawing_interface(NNid, NN, parameters_info):
 
                 avg_color = np.mean(cell_pixels, axis=(0, 1))
 
-                avg_color = tuple(int(c) for c in avg_color)
-                color_hex = f'#{avg_color[0]:02x}{avg_color[1]:02x}{avg_color[2]:02x}'
-                grid_canvas.create_rectangle(
-                    x_start // r, y_start // r, x_end // r, y_end // r,
-                    fill=color_hex, outline=color_hex
-                )
-
                 pixelized_image.append(avg_color[0])
+
+        output_image = Image.new("L", (28, 28))
+        output_image.putdata(pixelized_image)
+        output_image = output_image.resize((grid_canvas.winfo_width(), grid_canvas.winfo_height()), Image.NEAREST)
+
+        tk_image = ImageTk.PhotoImage(output_image)
+        grid_canvas.create_image(0, 0, anchor="nw", image=tk_image)
+        grid_canvas.image = tk_image
 
         # pixelized_image = np.array(pixelized_image).reshape(28, 28)
         # simplified_image = image_processor.extract_feature(pixelized_image)
