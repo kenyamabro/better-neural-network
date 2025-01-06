@@ -3,6 +3,9 @@ import image_processor
 import time
 import global_values
 
+k = 2
+AF = global_values.AFs('logistic', k = k)
+
 def forward_pass(a, layers_num, w, b, AF):
     z = []
     for l in range(1, layers_num):
@@ -13,16 +16,12 @@ def forward_pass(a, layers_num, w, b, AF):
 def create_network(hidden_layers, batches, batch_size, learning_rate, noise):
     layers = [784] + hidden_layers + [10]
     # layers = [global_values.inputs_num] + hidden_layers + [10]
-    # layers = [196] + hidden_layers + [10]
 
     global w, b
     w = [np.random.uniform(-1, 1, (layers[i + 1], layers[i]))
          for i in range(len(layers) - 1)]
     b = [np.random.uniform(-0.5, 0.5, layers[i + 1])
          for i in range(len(layers) - 1)]
-
-    def sech(x):
-        return 2 / (np.exp(x) + np.exp(-x))
 
     def minimize_cost_function():
         cost_series = []
@@ -40,24 +39,25 @@ def create_network(hidden_layers, batches, batch_size, learning_rate, noise):
                 y = global_values.y_train_one_hot[image_idx]
                 # image = np.array(global_values.x_train[image_idx] + np.random.uniform(-noise, noise, 784)).reshape(28, 28)
                 # # start_time = time.time()
-                # a = [image_processor.max_pool(image, 2, 2).flatten()]
+                # a = [image_processor.extract_feature(image)]
                 # # end_time = time.time()
                 # # runtime += end_time - start_time
 
                 a = [global_values.x_train[image_idx] + np.random.uniform(-noise, noise, 784)]
-                a, z = forward_pass(a, len(layers), w, b, global_values.AFs('logistic sigmoid'))
+                a, z = forward_pass(a, len(layers), w, b, AF)
 
                 costs_sum += np.sum((a[-1] - y) ** 2)
                 if np.argmax(a[-1]) == global_values.y_train[image_idx]:
                     accuracy += 1
 
                 cost_z = [None] * len(w)
-                cost_z[-1] = 2 * (a[-1] - y) * (sech(z[-1]) ** 2)
+
+                cost_z[-1] = 2 * (a[-1] - y) * AF(z[-1], True) * k
                 b_gradient[-1] += cost_z[-1]
                 w_gradient[-1] += np.outer(cost_z[-1], a[-2])
 
                 for l in range(len(w) - 2, -1, -1):
-                    cost_z[l] = (np.dot(w[l + 1].T, cost_z[l + 1]) * (sech(z[l]) ** 2))
+                    cost_z[l] = np.dot(w[l + 1].T, cost_z[l + 1]) * AF(z[l], True) * k
                     b_gradient[l] += cost_z[l]
                     w_gradient[l] += np.outer(cost_z[l], a[l])
 

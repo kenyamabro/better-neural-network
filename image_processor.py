@@ -62,14 +62,14 @@ def convolve(images, kernels, biases, stride, AF):
 def max_pool(image, pool_size, stride):
     out_height = (image.shape[0] - pool_size) // stride + 1
     out_width = (image.shape[1] - pool_size) // stride + 1
-    
+
     windows = np.lib.stride_tricks.sliding_window_view(image, (pool_size, pool_size))
     windows = windows[::stride, ::stride]
-    
+
     return windows.reshape(out_height, out_width, -1).max(axis=2)
 
 # test_image = np.random.uniform(0, 1, (28, 28))
-# start_time = time.time()
+# # start_time = time.time()
 # reduced_image = extract_feature(test_image)
-# end_time = time.time()
-# print(end_time - start_time)
+# # end_time = time.time()
+# # print(end_time - start_time)

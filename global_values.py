@@ -1,11 +1,19 @@
 import numpy as np
 import tensorflow as tf
 
-def AFs(name):
-    if name == 'ReLU': return lambda x : max(0, x)
-    elif name == 'sigmoid': return lambda x : 1 / (1 + np.exp(-x))
-    elif name == 'logistic sigmoid': return lambda x : (np.tanh(x) + 1) / 2
-    else: raise ValueError(f"Invalid activation function name: {name}")
+def logistic(k = 1):
+    return lambda x : 1 / (1 + np.exp(-k * x)) # Only changing the steepness
+    # return lambda x : L / (1 + np.exp(-k * (x - x0)))
+
+def AFs(name, **kwargs):
+    if name == 'ReLU':
+        return lambda x, derivative = False : (1 if x > 0 else 0) if derivative else max(0, x)
+    elif name == 'logistic':
+        k = kwargs.get('k', 1)
+        f = logistic(k)
+        return lambda x, derivative = False: k * f(x) * (1 - f(x)) if derivative else f(x)
+    else:
+        raise ValueError(f"Invalid activation function name: {name}")
 
 mnist = tf.keras.datasets.mnist
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
@@ -49,6 +57,6 @@ for layer, kernel_num in enumerate(kernel_nums):
         [np.random.uniform(-0.5, 0.5)
         for kernel in range(kernel_num)]
     )
-AFs_list = [AFs('ReLU'), AFs('sigmoid')]
+AFs_list = [AFs('ReLU'), AFs('logistic')]
 
 NN_list = []
