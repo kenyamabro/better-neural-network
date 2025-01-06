@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox
-import network
-import plots
-import drawing_interface
+import algorithm.network as network
+import interface.plots as plots
+import interface.drawing_interface as drawing_interface
 import global_values
 
 def run_training():

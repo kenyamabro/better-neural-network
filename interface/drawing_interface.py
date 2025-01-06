@@ -4,8 +4,8 @@ import numpy as np
 from PIL import ImageGrab
 from screeninfo import get_monitors
 import inflect
-import network
-import image_processor
+import algorithm.network as network
+import algorithm.image_processor as image_processor
 import global_values
 
 monitors = get_monitors()

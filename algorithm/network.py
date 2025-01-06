@@ -1,5 +1,5 @@
 import numpy as np
-import image_processor
+import algorithm.image_processor as image_processor
 import time
 import global_values
 
