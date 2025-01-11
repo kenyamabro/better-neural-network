@@ -1,9 +1,9 @@
 import numpy as np
 import time
-import global_values
+import global_values as global_values
 
-def pixelize_image(pixels):
-    pixelized_image = []
+def pixelate_image(pixels):
+    pixelated_image = []
     grid_size = pixels.shape[0] / 28
 
     for row in range(28):
@@ -17,9 +17,9 @@ def pixelize_image(pixels):
 
             avg_color = np.mean(cell_pixels, axis=(0, 1))
 
-            pixelized_image.append(avg_color[0])
+            pixelated_image.append(avg_color[0])
 
-    return pixelized_image
+    return pixelated_image
 
 def add_black_strips(image_array, strip_thickness, wider):
     if wider: # Vertical strips
@@ -55,24 +55,30 @@ def center_image(pixels):
 
 def extract_feature(initial_image):
     images = np.array([initial_image])
-    for kernels, biases, AF in zip(global_values.kernels_w, global_values.kernels_b, global_values.AFs_list):
-        images = convolve(images, kernels, biases, 1, AF)
+    AF = global_values.AFs('logistic', k = 2)
+    for kernels, biases in zip(global_values.kernels_w, global_values.kernels_b):
+        images = convolve(images, kernels, biases, AF)
         images = np.array([max_pool(image, 2, 2) for image in images])
     return images.flatten()
 
-def convolve(images, kernels, biases, stride, AF):
+def convolve(images, kernels, biases, AF):
     kernels = np.array(kernels)
     convolved_images = []
+    # print(kernels.shape)
     for kernel, bias in zip(kernels, biases):
-        kernel_height, kernel_width = kernel.shape[1], kernel.shape[2]
-        output_height = (images.shape[1] - kernel_height) // stride + 1
-        output_width = (images.shape[2] - kernel_width) // stride + 1
-        convolved_image = np.zeros((output_height, output_width))
+        kernel_depth, kernel_height, kernel_width = kernel.shape
+        output_height = (images.shape[1] - kernel_height) + 1
+        output_width = (images.shape[2] - kernel_width) + 1
 
-        for y in range(0, images.shape[1] - kernel_height + 1, stride):
-            for x in range(0, images.shape[2] - kernel_width + 1, stride):
+        toeplitz_matrix = np.zeros((kernel_height * kernel_width * kernel_depth, output_height * output_width))
+
+        for y in range(output_height):
+            for x in range(output_width):
                 region = images[:, y:y+kernel_height, x:x+kernel_width]
-                convolved_image[y // stride, x // stride] = AF(np.sum(region * kernel) + bias)
+                toeplitz_matrix[:, y * output_width + x] = region.reshape(-1)
+
+        convolved_flattened = np.dot(kernel.flatten(), toeplitz_matrix) + bias
+        convolved_image = AF(convolved_flattened).reshape(output_height, output_width)
 
         convolved_images.append(convolved_image)
 
@@ -88,7 +94,7 @@ def max_pool(image, pool_size, stride):
     return windows.reshape(out_height, out_width, -1).max(axis=2)
 
 # test_image = np.random.uniform(0, 1, (28, 28))
-# # start_time = time.time()
+# start_time = time.time()
 # reduced_image = extract_feature(test_image)
-# # end_time = time.time()
-# # print(end_time - start_time)
+# end_time = time.time()
+# print(end_time - start_time)

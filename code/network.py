@@ -1,7 +1,7 @@
 import numpy as np
-import algorithm.image_processor as image_processor
+import image_processor as image_processor
 import time
-import global_values
+import global_values as global_values
 
 k = 2
 AF = global_values.AFs('logistic', k = k)

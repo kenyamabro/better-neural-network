@@ -4,9 +4,9 @@ import numpy as np
 from PIL import Image, ImageGrab, ImageTk
 from screeninfo import get_monitors
 import inflect
-import algorithm.network as network
-import algorithm.image_processor as image_processor
-import global_values
+import network as network
+import image_processor as image_processor
+import global_values as global_values
 
 monitors = get_monitors()
 ie = inflect.engine()
@@ -40,7 +40,7 @@ def create_drawing_interface(NNid, NN, parameters_info):
 
         pixels = grab_canvas_image()
         pixels = image_processor.center_image(pixels)
-        pixels = image_processor.pixelize_image(pixels)
+        pixels = image_processor.pixelate_image(pixels)
 
         image = Image.new("L", (28, 28))
         image.putdata(pixels)
