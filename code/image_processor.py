@@ -55,13 +55,12 @@ def center_image(pixels):
 
 def extract_feature(initial_image):
     images = np.array([initial_image])
-    AF = global_values.AFs('logistic', k = 2)
     for kernels, biases in zip(global_values.kernels_w, global_values.kernels_b):
-        images = convolve(images, kernels, biases, AF)
+        images = convolve(images, kernels, biases)
         images = np.array([max_pool(image, 2, 2) for image in images])
     return images.flatten()
 
-def convolve(images, kernels, biases, AF):
+def convolve(images, kernels, biases):
     kernels = np.array(kernels)
     convolved_images = []
     # print(kernels.shape)
@@ -78,7 +77,7 @@ def convolve(images, kernels, biases, AF):
                 toeplitz_matrix[:, y * output_width + x] = region.reshape(-1)
 
         convolved_flattened = np.dot(kernel.flatten(), toeplitz_matrix) + bias
-        convolved_image = AF(convolved_flattened).reshape(output_height, output_width)
+        convolved_image = global_values.f(convolved_flattened).reshape(output_height, output_width)
 
         convolved_images.append(convolved_image)
 
@@ -93,8 +92,9 @@ def max_pool(image, pool_size, stride):
 
     return windows.reshape(out_height, out_width, -1).max(axis=2)
 
-# test_image = np.random.uniform(0, 1, (28, 28))
+# test_images = [np.random.uniform(0, 1, (28, 28)) for _ in range(50)]
 # start_time = time.time()
-# reduced_image = extract_feature(test_image)
+# for test_image in test_images:
+#     reduced_image = extract_feature(test_image)
 # end_time = time.time()
 # print(end_time - start_time)

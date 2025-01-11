@@ -1,19 +1,25 @@
 import numpy as np
 import tensorflow as tf
 
-def logistic(k = 1):
-    return lambda x : 1 / (1 + np.exp(-k * x))
-    # return lambda x : L / (1 + np.exp(-k * (x - x0)))
+def f(x):
+    return 1 / (1 + np.exp(-2 * x))
 
-def AFs(name, **parameters):
-    if name == 'ReLU':
-        return lambda x, derivative = False : (1 if x > 0 else 0) if derivative else max(0, x)
-    elif name == 'logistic':
-        k = parameters.get('k', 1)
-        f = logistic(k)
-        return lambda x, derivative = False: k * f(x) * (1 - f(x)) if derivative else f(x)
-    else:
-        raise ValueError(f"Invalid activation function name: {name}")
+def df(x):
+    return 2 * f(x) * (1 - f(x))
+
+# def logistic(k = 1):
+#     return lambda x : 1 / (1 + np.exp(-k * x))
+#     # return lambda x : L / (1 + np.exp(-k * (x - x0)))
+
+# def AFs(name, **parameters):
+#     if name == 'ReLU':
+#         return lambda x, derivative = False : (1 if x > 0 else 0) if derivative else max(0, x)
+#     elif name == 'logistic':
+#         k = parameters.get('k', 1)
+#         f = logistic(k)
+#         return lambda x, derivative = False: k * f(x) * (1 - f(x)) if derivative else f(x)
+#     else:
+#         raise ValueError(f"Invalid activation function name: {name}")
 
 mnist = tf.keras.datasets.mnist
 (x_train, y_train), (x_test, y_test) = mnist.load_data()

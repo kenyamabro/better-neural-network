@@ -3,14 +3,11 @@ import image_processor as image_processor
 import time
 import global_values as global_values
 
-k = 2
-AF = global_values.AFs('logistic', k = k)
-
-def forward_pass(a, layers_num, w, b, AF):
+def forward_pass(a, layers_num, w, b):
     z = []
     for l in range(1, layers_num):
         z.append(np.dot(w[l - 1], a[l - 1]) + b[l - 1])
-        a.append(AF(z[-1]))
+        a.append(global_values.f(z[-1]))
     return a, z
 
 def create_network(hidden_layers, batches, batch_size, learning_rate, noise):
@@ -44,7 +41,7 @@ def create_network(hidden_layers, batches, batch_size, learning_rate, noise):
                 # # runtime += end_time - start_time
 
                 a = [global_values.x_train[image_idx] + np.random.uniform(-noise, noise, 784)]
-                a, z = forward_pass(a, len(layers), w, b, AF)
+                a, z = forward_pass(a, len(layers), w, b)
 
                 costs_sum += np.sum((a[-1] - y) ** 2)
                 if np.argmax(a[-1]) == global_values.y_train[image_idx]:
@@ -52,12 +49,12 @@ def create_network(hidden_layers, batches, batch_size, learning_rate, noise):
 
                 cost_z = [None] * len(w)
 
-                cost_z[-1] = 2 * (a[-1] - y) * AF(z[-1], True) * k
+                cost_z[-1] = 2 * (a[-1] - y) * global_values.df(z[-1]) * 2
                 b_gradient[-1] += cost_z[-1]
                 w_gradient[-1] += np.outer(cost_z[-1], a[-2])
 
                 for l in range(len(w) - 2, -1, -1):
-                    cost_z[l] = np.dot(w[l + 1].T, cost_z[l + 1]) * AF(z[l], True) * k
+                    cost_z[l] = np.dot(w[l + 1].T, cost_z[l + 1]) * global_values.df(z[l]) * 2
                     b_gradient[l] += cost_z[l]
                     w_gradient[l] += np.outer(cost_z[l], a[l])
 
@@ -72,7 +69,7 @@ def create_network(hidden_layers, batches, batch_size, learning_rate, noise):
             accuracy_series.append(accuracy)
 
             # print(f'{x}# time : {runtime}, cost : {cost}, accuracy : {accuracy}')
-            # print(f'{x}# cost : {cost}, accuracy : {accuracy}')
+            print(f'{x}# cost : {cost}, accuracy : {accuracy}')
 
         return cost_series, accuracy_series
 
