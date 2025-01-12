@@ -1,12 +1,12 @@
 import numpy as np
-import image_processor as image_processor
+import image_processor
 import time
-import global_values as global_values
+import global_values
 
 def forward_pass(a, layers_num, w, b):
     z = []
-    for l in range(1, layers_num):
-        z.append(np.dot(w[l - 1], a[l - 1]) + b[l - 1])
+    for l in range(layers_num - 1):
+        z.append(np.dot(w[l], a[l]) + b[l])
         a.append(global_values.f(z[-1]))
     return a, z
 

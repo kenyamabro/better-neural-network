@@ -1,6 +1,6 @@
 import numpy as np
 import time
-import global_values as global_values
+import global_values
 
 def pixelate_image(pixels):
     pixelated_image = []

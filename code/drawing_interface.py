@@ -4,9 +4,8 @@ import numpy as np
 from PIL import Image, ImageGrab, ImageTk
 from screeninfo import get_monitors
 import inflect
-import network as network
-import image_processor as image_processor
-import global_values as global_values
+import network
+import image_processor
 
 monitors = get_monitors()
 ie = inflect.engine()
