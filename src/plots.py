@@ -1,8 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from neural_network import NeuralNetwork
 
-def create_weights_heatmap(NNid, NN, parameters_info):
-    map_num = NN['layers'][1]
+def create_weights_heatmap(NNid, NN: NeuralNetwork, parameters_info):
+    map_num = NN.layers[1]
     rows = np.floor(np.sqrt(map_num)-0.0001).astype('int')
     columns = rows + 1
     if rows * (columns) < map_num:
@@ -13,26 +14,26 @@ def create_weights_heatmap(NNid, NN, parameters_info):
     plt.get_current_fig_manager().set_window_title(f'[{NNid}] {plt_title}')
     plt.suptitle(f'{plt_title}\n{parameters_info}', fontsize=10)
 
-    max_weight = np.max(np.abs(NN['w'][0]))
-    side = int(np.sqrt(NN['w'][0].shape[1]))
+    max_weight = np.max(np.abs(NN.w[0]))
+    side = int(np.sqrt(NN.w[0].shape[1]))
 
     for i in range(map_num):
         plt.subplot(rows, columns, i + 1)
-        plt.imshow(NN['w'][0][i].reshape(side, side), cmap='bwr', aspect='auto', vmin=-max_weight, vmax=max_weight)
+        plt.imshow(NN.w[0][i].reshape(side, side), cmap='bwr', aspect='auto', vmin=-max_weight, vmax=max_weight)
         if i + 1 == map_num: plt.colorbar()
         plt.axis('off')
 
     plt.tight_layout()
     plt.show(block=False)
 
-def create_cost_acuracy_plot(NNid, NN, parameters_info):
+def create_cost_acuracy_plot(NNid, NN: NeuralNetwork, parameters_info):
     plt.figure(figsize=(5, 5))
     plt_title = 'Cost and Accuracy vs. Batch Number'
     plt.get_current_fig_manager().set_window_title(f'[{NNid}] {plt_title}')
     plt.suptitle(f'{plt_title}\n{parameters_info}', fontsize=10)
 
-    cost_line, = plt.plot(NN['cost'], label='Cost per output neuron', color='orange', marker='o', markersize=2, linewidth=1)
-    accuracy_line, = plt.plot(NN['accuracy'], label='Accuracy', color='green', marker='o', markersize=2, linewidth=1)
+    cost_line, = plt.plot(NN.cost_series, label='Cost per output neuron', color='orange', marker='o', markersize=2, linewidth=1)
+    accuracy_line, = plt.plot(NN.accuracy_series, label='Accuracy', color='green', marker='o', markersize=2, linewidth=1)
 
     plt.xlabel('Batch Number')
     plt.ylabel('Cost and Accuracy')

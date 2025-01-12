@@ -4,13 +4,13 @@ import numpy as np
 from PIL import Image, ImageGrab, ImageTk
 from screeninfo import get_monitors
 import inflect
-import network
+from neural_network import NeuralNetwork
 import image_processor
 
 monitors = get_monitors()
 ie = inflect.engine()
 
-def create_drawing_interface(NNid, NN, parameters_info):
+def create_drawing_interface(NNid, NN: NeuralNetwork, parameters_info):
     def grab_canvas_image():
         canvas_x = canvas.winfo_rootx()
         canvas_y = canvas.winfo_rooty()
@@ -53,8 +53,8 @@ def create_drawing_interface(NNid, NN, parameters_info):
         # simplified_image = image_processor.extract_feature(pixelized_image)
 
         # a = [np.array(simplified_image) / 255.0]
-        a = [np.array(pixels) / 255.0] + [None] * len(NN['w'])
-        a, z = network.forward_pass(len(NN['layers']), a, NN['w'], NN['b'])
+        a = [np.array(pixels) / 255.0] + [None] * len(NN.w)
+        a, z = NN.forward_pass(a)
         sorted_costs_indices = np.argsort(a[-1])[::-1]
 
         guesses_listbox.delete(0, tk.END)

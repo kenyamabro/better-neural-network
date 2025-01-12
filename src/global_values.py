@@ -63,5 +63,3 @@ for layer, kernel_num in enumerate(kernel_nums):
         [np.random.uniform(-0.5, 0.5)
         for kernel in range(kernel_num)]
     )
-
-NN_list = []

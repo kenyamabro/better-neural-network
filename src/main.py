@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-import network
+from neural_network import NeuralNetwork
 import plots
 import drawing_interface
 import global_values
@@ -23,10 +23,10 @@ def run_training():
         messagebox.showerror('Unexpected Error', f'An unexpected error occurred. Error: {e}')
 
 def start_training(hidden_layers, batches, batch_size, learning_rate, noise):
-    network.create_network(hidden_layers, batches, batch_size, learning_rate, noise)
+    nn = NeuralNetwork(hidden_layers, batches, batch_size, learning_rate, noise)
     train_text_var.set('')
     placeholder_label.lower()
-    listbox.insert(len(global_values.NN_list), f'#{len(global_values.NN_list)} : {hidden_layers}, {batches}, {batch_size}, {learning_rate}, {noise}')
+    listbox.insert(len(NeuralNetwork.NN_list), f'#{len(NeuralNetwork.NN_list)} : {hidden_layers}, {batches}, {batch_size}, {learning_rate}, {noise}')
 
 def create_entry(text, row, default_entry):
     tk.Label(root, text=text, anchor='w').grid(row=row, column=0, sticky='w')
@@ -40,9 +40,9 @@ def on_item_select(event):
     NNid = widget.nearest(event.y)
 
     if NNid >= 0:
-        NN = global_values.NN_list[NNid]
+        NN: NeuralNetwork = NeuralNetwork.NN_list[NNid]
         NNid += 1
-        parameters_info = f'Hidden layers: {NN['layers'][1:-1]}, Batches: {NN['iterations']} Batch size: {NN['batch_size']},\nLearning rate: {NN['learning_rate']}, Noise: {NN['noise']}'
+        parameters_info = f'Hidden layers: {NN.layers[1:-1]}, Batches: {NN.batches} Batch size: {NN.batch_size},\nLearning rate: {NN.learning_rate}, Noise: {NN.noise}'
 
         plots.create_weights_heatmap(NNid, NN, parameters_info)
         plots.create_cost_acuracy_plot(NNid, NN, parameters_info)
