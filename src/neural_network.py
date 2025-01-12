@@ -23,6 +23,9 @@ class NeuralNetwork:
         self.cost_series = np.zeros(batches)
         self.accuracy_series = np.zeros(batches)
 
+        f = global_values.f
+        df = global_values.df
+
         for x in range(batches):
             first_sample = batch_size * x
             costs_sum = 0
@@ -37,7 +40,7 @@ class NeuralNetwork:
                 # a = [image_processor.extract_feature(image)] + [None] * len(w)
 
                 a = [global_values.x_train[image_idx] + np.random.uniform(-noise, noise, 784)] + [None] * len(self.w)
-                a, z = self.forward_pass(a)
+                a, z = self.forward_pass(a, f)
 
                 costs_sum += np.sum((a[-1] - y) ** 2)
                 if np.argmax(a[-1]) == global_values.y_train[image_idx]:
@@ -45,12 +48,12 @@ class NeuralNetwork:
 
                 cost_z = [None] * len(self.w)
 
-                cost_z[-1] = 2 * (a[-1] - y) * global_values.df(z[-1]) * 2
+                cost_z[-1] = 2 * (a[-1] - y) * df(z[-1]) * 2
                 b_gradient[-1] += cost_z[-1]
                 w_gradient[-1] += np.outer(cost_z[-1], a[-2])
 
                 for l in range(len(self.w) - 2, -1, -1):
-                    cost_z[l] = np.dot(self.w[l + 1].T, cost_z[l + 1]) * global_values.df(z[l]) * 2
+                    cost_z[l] = np.dot(self.w[l + 1].T, cost_z[l + 1]) * df(z[l]) * 2
                     b_gradient[l] += cost_z[l]
                     w_gradient[l] += np.outer(cost_z[l], a[l])
 
@@ -64,9 +67,9 @@ class NeuralNetwork:
         print(time.time() - start)
         NeuralNetwork.NN_list.append(self)
 
-    def forward_pass(self, a):
+    def forward_pass(self, a, f):
         z = [None] * (len(self.layers) - 1)
         for l in range(len(self.layers) - 1):
             z[l] = np.dot(self.w[l], a[l]) + self.b[l]
-            a[l + 1] = global_values.f(z[l])
+            a[l + 1] = f(z[l])
         return a, z

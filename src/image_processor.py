@@ -59,11 +59,11 @@ def center_image(pixels):
 def extract_feature(initial_image):
     images = np.array([initial_image])
     for kernels, biases in zip(global_values.kernels_w, global_values.kernels_b):
-        images = convolve(images, kernels, biases)
+        images = convolve(images, kernels, biases, f=global_values.f)
         images = np.array([max_pool(image, 2, 2) for image in images])
     return images.flatten()
 
-def convolve(images, kernels, biases):
+def convolve(images, kernels, biases, f):
     kernels = np.array(kernels)
     convolved_images = []
     # print(kernels.shape)
@@ -80,7 +80,7 @@ def convolve(images, kernels, biases):
                 toeplitz_matrix[:, y * output_width + x] = region.reshape(-1)
 
         convolved_flattened = np.dot(kernel.flatten(), toeplitz_matrix) + bias
-        convolved_image = global_values.f(convolved_flattened).reshape(output_height, output_width)
+        convolved_image = f(convolved_flattened).reshape(output_height, output_width)
 
         convolved_images.append(convolved_image)
 

@@ -6,6 +6,7 @@ from screeninfo import get_monitors
 import inflect
 from neural_network import NeuralNetwork
 import image_processor
+import global_values
 
 monitors = get_monitors()
 ie = inflect.engine()
@@ -54,7 +55,7 @@ def create_drawing_interface(NNid, NN: NeuralNetwork, parameters_info):
 
         # a = [np.array(simplified_image) / 255.0]
         a = [np.array(pixels) / 255.0] + [None] * len(NN.w)
-        a, z = NN.forward_pass(a)
+        a, z = NN.forward_pass(a, f=global_values.f)
         sorted_costs_indices = np.argsort(a[-1])[::-1]
 
         guesses_listbox.delete(0, tk.END)
