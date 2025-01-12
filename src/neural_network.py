@@ -1,6 +1,5 @@
 import numpy as np
 import image_processor
-import time
 import global_values
 
 class NeuralNetwork:
@@ -17,8 +16,6 @@ class NeuralNetwork:
                   for i in range(len(self.layers) - 1)]
         self.b = [np.random.uniform(-0.5, 0.5, self.layers[i + 1])
                   for i in range(len(self.layers) - 1)]
-
-        start = time.time()
 
         self.cost_series = np.zeros(batches)
         self.accuracy_series = np.zeros(batches)
@@ -64,7 +61,6 @@ class NeuralNetwork:
             self.cost_series[x] = costs_sum / self.layers[-1] / batch_size
             self.accuracy_series[x] = accuracy / batch_size
 
-        print(time.time() - start)
         NeuralNetwork.NN_list.append(self)
 
     def forward_pass(self, a, f):

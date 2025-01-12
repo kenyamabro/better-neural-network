@@ -4,6 +4,7 @@ from neural_network import NeuralNetwork
 import plots
 import drawing_interface
 import global_values
+import time
 
 def run_training():
     try:
@@ -23,7 +24,10 @@ def run_training():
         messagebox.showerror('Unexpected Error', f'An unexpected error occurred. Error: {e}')
 
 def start_training(hidden_layers, batches, batch_size, learning_rate, noise):
+    start = time.time()
     nn = NeuralNetwork(hidden_layers, batches, batch_size, learning_rate, noise)
+    print(time.time() - start)
+
     train_text_var.set('')
     placeholder_label.lower()
     listbox.insert(len(NeuralNetwork.NN_list), f'#{len(NeuralNetwork.NN_list)} : {hidden_layers}, {batches}, {batch_size}, {learning_rate}, {noise}')
