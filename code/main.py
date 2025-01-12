@@ -58,7 +58,7 @@ tk.Label(root, text='MNIST dataset\n (28x28 pixels images of\n handwritten singl
 tk.Label(root, text='Datapoints:', anchor='w').grid(row=1, column=0, sticky='w')
 tk.Label(root, text=len(global_values.x_train), anchor='w').grid(row=1, column=1, sticky='w')
 
-create_entry('Hidden Layers (Comma-Separated):', 2, '20,20')
+create_entry('Hidden Layers (Comma-Separated):', 2, '10,20')
 create_entry('Batches:', 3, '1200')
 create_entry('Batch Size:', 4, '50')
 create_entry('Learning Rate:', 5, '0.4')
