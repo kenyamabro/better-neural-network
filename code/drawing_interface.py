@@ -26,10 +26,9 @@ def create_drawing_interface(NNid, NN, parameters_info):
 
     def draw(event):
         x, y = event.x, event.y
-        try: fs = int(font_size_entry.get())
-        except: return
-        gray_value = gray_scale.get()
-        color = f"#{gray_value:02x}{gray_value:02x}{gray_value:02x}"
+        fs = font_scale.get() # 'fs' for 'font size', not 'font scale'
+        gt = gray_scale.get() # 'gt' for 'gray tone'
+        color = f"#{gt:02x}{gt:02x}{gt:02x}"
         canvas.create_oval(x - fs, y - fs, x + fs, y + fs, fill=color, outline=color)
 
     def clear_canvas():
@@ -81,9 +80,9 @@ def create_drawing_interface(NNid, NN, parameters_info):
     control_layout.grid(row=0, column=2, sticky='n')
 
     tk.Label(control_layout, text='font size:', anchor='w').grid(row=0, column=0, sticky='w')
-    font_size_entry = tk.Entry(control_layout)
-    font_size_entry.grid(row=0, column=1, sticky='ew')
-    font_size_entry.insert(0, '15')
+    font_scale = tk.Scale(control_layout, from_=0, to=200, orient='horizontal', length=200)
+    font_scale.set(15)
+    font_scale.grid(row=0, column=1, sticky='ew')
 
     tk.Label(control_layout, text='gray tone:', anchor='w').grid(row=1, column=0, sticky='w')
     gray_scale = tk.Scale(control_layout, from_=0, to=255, orient='horizontal', length=200)
