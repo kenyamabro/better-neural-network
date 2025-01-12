@@ -28,8 +28,9 @@ def create_drawing_interface(NNid, NN, parameters_info):
         x, y = event.x, event.y
         try: fs = int(font_size_entry.get())
         except: return
-        color = color_var.get()
-        canvas.create_oval(x-fs, y-fs, x+fs, y+fs, fill=color, outline=color)
+        gray_value = gray_scale.get()
+        color = f"#{gray_value:02x}{gray_value:02x}{gray_value:02x}"
+        canvas.create_oval(x - fs, y - fs, x + fs, y + fs, fill=color, outline=color)
 
     def clear_canvas():
         canvas.delete('all')
@@ -84,10 +85,10 @@ def create_drawing_interface(NNid, NN, parameters_info):
     font_size_entry.grid(row=0, column=1, sticky='ew')
     font_size_entry.insert(0, '15')
 
-    tk.Label(control_layout, text='color:', anchor='w').grid(row=1, column=0, sticky='w')
-    color_var = tk.StringVar(value='white')
-    color_menu = tk.OptionMenu(control_layout, color_var, 'black', 'white')
-    color_menu.grid(row=1, column=1, sticky='ew')
+    tk.Label(control_layout, text='gray tone:', anchor='w').grid(row=1, column=0, sticky='w')
+    gray_scale = tk.Scale(control_layout, from_=0, to=255, orient='horizontal', length=200)
+    gray_scale.set(255)
+    gray_scale.grid(row=1, column=1, sticky='ew')
 
     clear_button = tk.Button(control_layout, text='Clear', command=clear_canvas)
     clear_button.grid(row=2, column=0, sticky='ew')
