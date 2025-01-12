@@ -67,7 +67,7 @@ def create_network(hidden_layers, batches, batch_size, learning_rate, noise):
     print(time.time() - start)
 
     global_values.NN_list.append({
-        'hidden_layers': hidden_layers,
+        'layers': layers,
         'iterations': batches,
         'batch_size': batch_size,
         'learning_rate': learning_rate,

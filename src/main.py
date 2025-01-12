@@ -42,7 +42,7 @@ def on_item_select(event):
     if NNid >= 0:
         NN = global_values.NN_list[NNid]
         NNid += 1
-        parameters_info = f'Hidden layers: {NN['hidden_layers']}, Batches: {NN['iterations']} Batch size: {NN['batch_size']},\nLearning rate: {NN['learning_rate']}, Noise: {NN['noise']}'
+        parameters_info = f'Hidden layers: {NN['layers'][1:-1]}, Batches: {NN['iterations']} Batch size: {NN['batch_size']},\nLearning rate: {NN['learning_rate']}, Noise: {NN['noise']}'
 
         plots.create_weights_heatmap(NNid, NN, parameters_info)
         plots.create_cost_acuracy_plot(NNid, NN, parameters_info)

@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def create_weights_heatmap(NNid, NN, parameters_info):
-    map_num = NN['hidden_layers'][0]
+    map_num = NN['layers'][1]
     rows = np.floor(np.sqrt(map_num)-0.0001).astype('int')
     columns = rows + 1
     if rows * (columns) < map_num:

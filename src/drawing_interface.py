@@ -54,7 +54,7 @@ def create_drawing_interface(NNid, NN, parameters_info):
 
         # a = [np.array(simplified_image) / 255.0]
         a = [np.array(pixels) / 255.0] + [None] * len(NN['w'])
-        a, z = network.forward_pass(len(NN['hidden_layers']) + 2, a, NN['w'], NN['b'])
+        a, z = network.forward_pass(len(NN['layers']), a, NN['w'], NN['b'])
         sorted_costs_indices = np.argsort(a[-1])[::-1]
 
         guesses_listbox.delete(0, tk.END)
