@@ -4,25 +4,19 @@ import time
 import global_values
 
 def forward_pass(a, layers_num, w, b):
-    z = []
+    z = [None] * (layers_num - 1)
     for l in range(layers_num - 1):
-        z.append(np.dot(w[l], a[l]) + b[l])
-        a.append(global_values.f(z[-1]))
+        z[l] = np.dot(w[l], a[l]) + b[l]
+        a[l + 1] = global_values.f(z[l])
     return a, z
 
 def create_network(hidden_layers, batches, batch_size, learning_rate, noise):
     layers = [784] + hidden_layers + [10]
     # layers = [global_values.inputs_num] + hidden_layers + [10]
 
-    global w, b
-    w = [np.random.uniform(-1, 1, (layers[i + 1], layers[i]))
-         for i in range(len(layers) - 1)]
-    b = [np.random.uniform(-0.5, 0.5, layers[i + 1])
-         for i in range(len(layers) - 1)]
-
-    def minimize_cost_function():
-        cost_series = []
-        accuracy_series = []
+    def minimize_cost_function(w, b):
+        cost_series = np.zeros(batches)
+        accuracy_series = np.zeros(batches)
         for x in range(batches):
             first_sample = batch_size * x
             costs_sum = 0
@@ -40,7 +34,7 @@ def create_network(hidden_layers, batches, batch_size, learning_rate, noise):
                 # # end_time = time.time()
                 # # runtime += end_time - start_time
 
-                a = [global_values.x_train[image_idx] + np.random.uniform(-noise, noise, 784)]
+                a = [global_values.x_train[image_idx] + np.random.uniform(-noise, noise, 784)] + [None] * len(w)
                 a, z = forward_pass(a, len(layers), w, b)
 
                 costs_sum += np.sum((a[-1] - y) ** 2)
@@ -65,15 +59,22 @@ def create_network(hidden_layers, batches, batch_size, learning_rate, noise):
             cost = costs_sum / layers[-1] / batch_size
             accuracy /= batch_size
 
-            cost_series.append(cost)
-            accuracy_series.append(accuracy)
+            cost_series[x] = cost
+            accuracy_series[x] = accuracy
 
             # print(f'{x}# time : {runtime}, cost : {cost}, accuracy : {accuracy}')
             # print(f'{x}# cost : {cost}, accuracy : {accuracy}')
 
-        return cost_series, accuracy_series
+        return w, b, cost_series, accuracy_series
 
-    cost_series, accuracy_series = minimize_cost_function()
+    w = [np.random.uniform(-1, 1, (layers[i + 1], layers[i]))
+         for i in range(len(layers) - 1)]
+    b = [np.random.uniform(-0.5, 0.5, layers[i + 1])
+         for i in range(len(layers) - 1)]
+
+    start = time.time()
+    w, b, cost_series, accuracy_series = minimize_cost_function(w, b)
+    print(time.time() - start)
 
     global_values.NN_list.append({
         'hidden_layers': hidden_layers,
