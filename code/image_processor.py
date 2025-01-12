@@ -31,8 +31,11 @@ def add_black_strips(image_array, strip_thickness, wider):
     
 def center_image(pixels):
     colored_area = np.argwhere(pixels[:, :, :3].any(axis=-1))
-    y_start, x_start = colored_area.min(axis=0)
-    y_end, x_end = colored_area.max(axis=0)
+    try: 
+        y_start, x_start = colored_area.min(axis=0)
+        y_end, x_end = colored_area.max(axis=0)
+    except:
+        return pixels
     pixels = pixels[y_start:y_end + 1, x_start:x_end + 1]
 
     width = x_end - x_start
